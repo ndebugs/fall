@@ -1,0 +1,10 @@
+# PHP Composer
+composer.phar
+composer.lock
+/vendor/
+
+# Netbeans
+nbproject/private/
+
+# OSX
+.DS_Store

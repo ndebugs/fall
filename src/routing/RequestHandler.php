@@ -45,7 +45,7 @@ class RequestHandler {
         }
     }
     
-    public function setTypeArgument(object $value) {
+    public function setTypeArgument($value) {
         $this->typeArguments[get_class($value)] = $value;
     }
     

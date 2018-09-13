@@ -1,18 +1,25 @@
 <?php
 
-namespace ndebugs\fall\context;
+namespace ndebugs\fall\routing;
 
+use Exception;
 use ndebugs\fall\annotation\Autowired;
 use ndebugs\fall\annotation\Component;
 use ndebugs\fall\annotation\Controller;
 use ndebugs\fall\annotation\PostConstruct;
-use ndebugs\fall\net\HTTPRequest;
+use ndebugs\fall\context\ApplicationContext;
+use ndebugs\fall\context\RequestContext;
+use ndebugs\fall\http\HTTPManager;
+use ndebugs\fall\http\HTTPRequest;
+use ndebugs\fall\http\HTTPResponse;
+use ndebugs\fall\http\RequestHandler;
+use ndebugs\fall\http\ResponseHandler;
 use ndebugs\fall\net\Path;
 use ndebugs\fall\routing\PathEvaluator;
-use ndebugs\fall\routing\RequestHandler;
 use ndebugs\fall\routing\RouteGroup;
 use ndebugs\fall\routing\RouteLoader;
 use ndebugs\fall\routing\RouteValidator;
+use ndebugs\fall\web\HTTPNotFoundException;
 
 /** @Component */
 class RouteManager {
@@ -20,8 +27,8 @@ class RouteManager {
     /** @Autowired(ApplicationContext::class) */
     public $context;
     
-    /** @Autowired(SessionManager::class) */
-    public $sessionManager;
+    /** @Autowired(HTTPManager::class) */
+    public $httpManager;
     
     private $routeGroups = [];
     private $routes = [];
@@ -83,12 +90,30 @@ class RouteManager {
         return null;
     }
     
-    public function process(HTTPRequest $request) {
-        $evaluator = new PathEvaluator($request);
-        $context = $this->evaluateGroups($evaluator);
-        if ($context) {
-            $handler = new RequestHandler($this->context, $context);
-            $result = $handler->process();
+    public function process(HTTPRequest $request, HTTPResponse $response) {
+        $result = null;
+        $responseAttribute = null;
+        
+        try {
+            $evaluator = new PathEvaluator($request);
+            $context = $this->evaluateGroups($evaluator);
+            if ($context) {
+                $route = $context->getRoute();
+                $responseAttribute = $route->getResponseAttribute();
+
+                $requestHandler = new RequestHandler($this->context, $context);
+                $requestHandler->setTypeArgument($request);
+                $requestHandler->setTypeArgument($response);
+
+                $result = $requestHandler->process();
+            } else {
+                $result = new HTTPNotFoundException('The requested URL ' . $request->getURL() . ' was not found on this server.');
+            }
+        } catch (Exception $e) {
+            $result = $e;
         }
+        
+        $responseHandler = new ResponseHandler($this->context, $response);
+        $responseHandler->process($result, $responseAttribute);
     }
 }

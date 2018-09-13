@@ -7,8 +7,8 @@ use Composer\Autoload\ClassLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use ndebugs\fall\annotation\Component;
-use ndebugs\fall\annotation\DataTypeAdapter;
-use ndebugs\fall\annotation\DocumentTypeAdapter;
+use ndebugs\fall\annotation\TypeAdapter;
+use ndebugs\fall\annotation\TypeFilter;
 use ndebugs\fall\util\Strings;
 
 class ApplicationContext {
@@ -16,7 +16,8 @@ class ApplicationContext {
     private $properties = [
         'base_url' => '/',
         'scan_packages' => ['ndebugs\\fall'],
-        'temp_directory' => './tmp'
+        'temp_directory' => './tmp',
+        'web_directory' => './web'
     ];
     
     private $componentContexts;
@@ -92,22 +93,24 @@ class ApplicationContext {
         return $map;
     }
     
-    public function getDataTypeAdapter($type) {
+    public function getTypeAdapter($class, $type) {
         foreach ($this->componentContexts as $context) {
             $componentType = $context->getType();
-            if ($componentType instanceof DataTypeAdapter &&
-                    $type === $componentType->type) {
+            if ($componentType instanceof TypeAdapter &&
+                    $componentType instanceof $class &&
+                    $componentType->hasType($type)) {
                 return $context->getValue($this);
             }
         }
         return null;
     }
     
-    public function getDocumentTypeAdapter($type) {
+    public function getTypeFilter($class, $object) {
         foreach ($this->componentContexts as $context) {
             $componentType = $context->getType();
-            if ($componentType instanceof DocumentTypeAdapter &&
-                    in_array($type, $componentType->types, true)) {
+            if ($componentType instanceof TypeFilter &&
+                    $componentType instanceof $class &&
+                    $componentType->matchType($object)) {
                 return $context->getValue($this);
             }
         }

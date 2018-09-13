@@ -8,6 +8,6 @@ namespace ndebugs\fall\annotation;
  */
 final class Roles {
     
-    /** @var array */
+    /** @var array<string> */
     public $values;
 }

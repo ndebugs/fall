@@ -3,8 +3,9 @@
 namespace ndebugs\fall\routing;
 
 use ReflectionMethod;
+use ndebugs\fall\annotation\RequestAttribute;
 use ndebugs\fall\annotation\RequestMap;
-use ndebugs\fall\annotation\RequestParameter;
+use ndebugs\fall\annotation\ResponseAttribute;
 use ndebugs\fall\annotation\Roles;
 use ndebugs\fall\net\Path;
 use ndebugs\fall\routing\Route;
@@ -17,7 +18,8 @@ class RouteBuilder {
     private $path;
     private $method;
     private $headers;
-    private $parameters;
+    private $requestAttributes;
+    private $responseAttribute;
     private $roles;
     
     public function setGroup(RouteGroup $group) {
@@ -40,11 +42,18 @@ class RouteBuilder {
         return $this;
     }
     
-    public function addParameter(RequestParameter $parameter) {
-        if (!$this->parameters) {
-            $this->parameters = [];
+    public function addRequestAttribute(RequestAttribute $attribute) {
+        if (!$this->requestAttributes) {
+            $this->requestAttributes = [$attribute];
+        } else {
+            $this->requestAttributes[] = $attribute;
         }
-        $this->parameters[] = $parameter;
+        
+        return $this;
+    }
+    
+    public function setResponseAttribute(ResponseAttribute $attribute) {
+        $this->responseAttribute = $attribute;
         
         return $this;
     }
@@ -62,7 +71,8 @@ class RouteBuilder {
         $route->setPath($this->path);
         $route->setMethod($this->method);
         $route->setHeaders($this->headers);
-        $route->setParameters($this->parameters);
+        $route->setRequestAttributes($this->requestAttributes);
+        $route->setResponseAttribute($this->responseAttribute);
         $route->setRoles($this->roles);
         
         return $route;

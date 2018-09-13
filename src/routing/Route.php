@@ -3,6 +3,7 @@
 namespace ndebugs\fall\routing;
 
 use ReflectionMethod;
+use ndebugs\fall\annotation\ResponseAttribute;
 use ndebugs\fall\net\Path;
 
 class Route {
@@ -12,7 +13,8 @@ class Route {
     private $path;
     private $method;
     private $headers;
-    private $parameters;
+    private $requestAttributes;
+    private $responseAttribute;
     private $roles;
     
     public function getGroup() {
@@ -51,16 +53,24 @@ class Route {
         return $this->headers;
     }
 
-    public function setHeaders($headers) {
+    public function setHeaders(array $headers = null) {
         $this->headers = $headers;
     }
 
-    public function getParameters() {
-        return $this->parameters;
+    public function getRequestAttributes() {
+        return $this->requestAttributes;
     }
 
-    public function setParameters($parameters) {
-        $this->parameters = $parameters;
+    public function setRequestAttributes(array $requestAttributes = null) {
+        $this->requestAttributes = $requestAttributes;
+    }
+
+    public function getResponseAttribute() {
+        return $this->responseAttribute;
+    }
+
+    public function setResponseAttribute(ResponseAttribute $responseAttribute = null) {
+        $this->responseAttribute = $responseAttribute;
     }
 
     public function getRoles() {

@@ -2,7 +2,7 @@
 
 namespace ndebugs\fall\routing;
 
-use ndebugs\fall\net\HTTPRequest;
+use ndebugs\fall\http\HTTPRequest;
 use ndebugs\fall\net\Path;
 
 class PathEvaluator {

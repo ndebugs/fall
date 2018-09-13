@@ -5,8 +5,9 @@ namespace ndebugs\fall\routing;
 use ReflectionClass;
 use ReflectionMethod;
 use Doctrine\Common\Annotations\AnnotationReader;
+use ndebugs\fall\annotation\RequestAttribute;
 use ndebugs\fall\annotation\RequestMap;
-use ndebugs\fall\annotation\RequestParameter;
+use ndebugs\fall\annotation\ResponseAttribute;
 use ndebugs\fall\annotation\Roles;
 use ndebugs\fall\routing\RouteGroup;
 
@@ -31,8 +32,10 @@ class RouteLoader {
             
             $annotations = $reader->getMethodAnnotations($method);
             foreach ($annotations as $annotation) {
-                if ($annotation instanceof RequestParameter) {
-                    $builder->addParameter($annotation);
+                if ($annotation instanceof RequestAttribute) {
+                    $builder->addRequestAttribute($annotation);
+                } else if ($annotation instanceof ResponseAttribute) {
+                    $builder->setResponseAttribute($annotation);
                 }
             }
             

@@ -2,7 +2,7 @@
 
 namespace ndebugs\fall\adapter;
 
-interface TypeAdapter {
+interface TypeAdaptable {
     
     public function unmarshall($value);
     

@@ -10,7 +10,7 @@ use ndebugs\fall\annotation\DocumentTypeAdapter;
  *  "application/javascript"
  * })
  */
-class JSONAdapter implements TypeAdapter {
+class JSONAdapter implements TypeAdaptable {
     
     public function unmarshall($value) {
         return json_decode($value, true);

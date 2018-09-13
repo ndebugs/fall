@@ -1,17 +1,17 @@
 <?php
 
-namespace ndebugs\fall\net;
+namespace ndebugs\fall\http;
 
-use ndebugs\fall\io\FileInputStream;
+use ndebugs\fall\io\InputStream;
 use ndebugs\fall\net\URL;
 
-class HTTPRequest {
+class HTTPRequest extends HTTPMessage {
     
     private $method;
     private $url;
     private $version;
     private $headers;
-    private $body;
+    private $content;
     
     public function getMethod() {
         return $this->method;
@@ -42,19 +42,31 @@ class HTTPRequest {
         return isset($this->headers[$uKey]) ? $this->headers[$uKey] : null;
     }
 
+    public function getContentType() {
+        return $this->getHeader(self::HEADER_CONTENT_TYPE);
+    }
+    
+    public function setHeader($key, $value) {
+        if ($this->headers === null) {
+            $this->headers = [$key => $value];
+        } else {
+            $this->headers[$key] = $value;
+        }
+    }
+    
     public function getHeaders() {
         return $this->headers;
     }
 
-    public function setHeaders($headers) {
+    public function setHeaders(array $headers) {
         $this->headers = $headers;
     }
     
-    public function getBody() {
-        return $this->body;
+    public function getContent() {
+        return $this->content;
     }
 
-    public function setBody(FileInputStream $body = null) {
-        $this->body = $body;
+    public function setContent(InputStream $content = null) {
+        $this->content = $content;
     }
 }

@@ -4,8 +4,8 @@ namespace ndebugs\fall;
 
 use Composer\Autoload\ClassLoader;
 use ndebugs\fall\context\ApplicationContext;
-use ndebugs\fall\context\RouteManager;
-use ndebugs\fall\context\SessionManager;
+use ndebugs\fall\http\HTTPManager;
+use ndebugs\fall\routing\RouteManager;
 
 class Application {
     
@@ -21,11 +21,12 @@ class Application {
     }
 
     private function process() {
-        $routeManager = $this->context->getComponent(RouteManager::class);
-        $sessionManager = $this->context->getComponent(SessionManager::class);
+        $httpManager = $this->context->getComponent(HTTPManager::class);
+        $request = $httpManager->getRequest();
+        $response = $httpManager->createResponse();
         
-        $request = $sessionManager->getRequest();
-        $routeManager->process($request);
+        $routeManager = $this->context->getComponent(RouteManager::class);
+        $routeManager->process($request, $response);
     }
     
     public static function getInstance() {

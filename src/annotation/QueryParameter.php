@@ -2,6 +2,7 @@
 
 namespace ndebugs\fall\annotation;
 
+use ndebugs\fall\annotation\DataTypeAdapter;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\context\RequestContext;
 
@@ -9,7 +10,7 @@ use ndebugs\fall\context\RequestContext;
  * @Annotation
  * @Target("METHOD")
  */
-final class QueryParameter implements RequestParameter {
+final class QueryParameter extends RequestAttribute {
     
     /** @var string */
     public $name;
@@ -17,9 +18,7 @@ final class QueryParameter implements RequestParameter {
     /** @var string */
     public $alias;
     
-    /**
-     * @var string
-     */
+    /** @var string */
     public $type;
     
     public function getAlias() {
@@ -29,10 +28,10 @@ final class QueryParameter implements RequestParameter {
     public function evaluate(ApplicationContext $context, RequestContext $requestContext) {
         $request = $requestContext->getValue();
         $query = $request->getURL()->getQuery();
-        $value = $query->get($this->name);
+        $value = $query ? $query->get($this->name) : null;
         
         if ($this->type) {
-            $adapter = $context->getDataTypeAdapter($this->type);
+            $adapter = $context->getTypeAdapter(DataTypeAdapter::class, $this->type);
             return $adapter ? $adapter->unmarshall($value) : null;
         } else {
             return $value;

@@ -4,10 +4,8 @@ namespace ndebugs\fall\adapter;
 
 use ndebugs\fall\annotation\DataTypeAdapter;
 
-/**
- * @DataTypeAdapter("float")
- */
-class FloatAdapter implements TypeAdapter {
+/** @DataTypeAdapter("float") */
+class FloatAdapter implements TypeAdaptable {
     
     public function unmarshall($value) {
         return floatval($value);

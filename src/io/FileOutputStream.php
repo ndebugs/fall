@@ -2,13 +2,11 @@
 
 namespace ndebugs\fall\io;
 
-class FileOutputStream {
-    
-    const DEFAULT_WRITE_BUFFER = 8192;
+class FileOutputStream extends OutputStream {
     
     private $stream;
     
-    public function __construct($path, $append = false, $buffer = FileOutputStream::DEFAULT_WRITE_BUFFER) {
+    public function __construct($path, $append = false, $buffer = OutputStream::DEFAULT_WRITE_BUFFER) {
         $this->stream = fopen($path, $append ? 'a' : 'w');
         
         stream_set_write_buffer($this->stream, $buffer);
@@ -42,13 +40,13 @@ class FileOutputStream {
         return fclose($this->stream);
     }
     
-    public static function appendAll($path, $data, $buffer = FileOutputStream::DEFAULT_WRITE_BUFFER) {
+    public static function appendAll($path, $data, $buffer = OutputStream::DEFAULT_WRITE_BUFFER) {
         $out = new FileOutputStream($path, true, $buffer);
         $out->write($data);
         $out->close();
     }
     
-    public static function writeAll($path, $data, $buffer = FileOutputStream::DEFAULT_WRITE_BUFFER) {
+    public static function writeAll($path, $data, $buffer = OutputStream::DEFAULT_WRITE_BUFFER) {
         $out = new FileOutputStream($path, false, $buffer);
         $out->write($data);
         $out->flush();

@@ -46,7 +46,7 @@ class URL {
         return $this->query;
     }
 
-    public function setQuery(QueryString $query) {
+    public function setQuery(QueryString $query = null) {
         $this->query = $query;
     }
     

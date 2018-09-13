@@ -6,7 +6,7 @@ use ndebugs\fall\annotation\DocumentTypeAdapter;
 use ndebugs\fall\net\QueryString;
 
 /** @DocumentTypeAdapter("application/x-www-form-urlencoded") */
-class QueryStringAdapter implements TypeAdapter {
+class QueryStringAdapter implements TypeAdaptable {
     
     public function unmarshall($value) {
         $query = QueryString::parse($value);

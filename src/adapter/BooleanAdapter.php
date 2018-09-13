@@ -4,10 +4,8 @@ namespace ndebugs\fall\adapter;
 
 use ndebugs\fall\annotation\DataTypeAdapter;
 
-/**
- * @DataTypeAdapter("boolean")
- */
-class BooleanAdapter implements TypeAdapter {
+/** @DataTypeAdapter("boolean") */
+class BooleanAdapter implements TypeAdaptable {
     
     const TRUE_VALUE = 'true';
     const FALSE_VALUE = 'false';

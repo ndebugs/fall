@@ -11,7 +11,7 @@ class Path {
     private $segments;
     private $separator;
     
-    public function __construct($segments, $separator = Path::SEPARATOR) {
+    public function __construct(array $segments, $separator = Path::SEPARATOR) {
         $this->segments = $segments;
         $this->separator = $separator;
     }

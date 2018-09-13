@@ -1,7 +1,8 @@
 <?php
 
-namespace ndebugs\fall\routing;
+namespace ndebugs\fall\http;
 
+use ndebugs\fall\annotation\DataTypeAdapter;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\context\RequestContext;
 
@@ -20,14 +21,12 @@ class RequestHandler {
     }
 
     private function init() {
-        $this->setTypeArgument($this->requestContext->getValue());
-            
         $route = $this->requestContext->getRoute();
-        $parameters = $route->getParameters();
-        if ($parameters) {
-            foreach ($parameters as $parameter) {
-                $value = $parameter->evaluate($this->context, $this->requestContext);
-                $this->setArgument($parameter->getAlias(), $value);
+        $attributes = $route->getRequestAttributes();
+        if ($attributes) {
+            foreach ($attributes as $attribute) {
+                $value = $attribute->evaluate($this->context, $this->requestContext);
+                $this->setArgument($attribute->getAlias(), $value);
             }
         }
     }
@@ -64,7 +63,7 @@ class RequestHandler {
             
             $argument = $this->getArgument($key, $type);
             if ($type && !$argument instanceof $type) {
-                $adapter = $this->context->getDataTypeAdapter($type);
+                $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type);
                 $arguments[] = $adapter ? $adapter->unmarshall($argument) : $argument;
             } else {
                 $arguments[] = $argument;

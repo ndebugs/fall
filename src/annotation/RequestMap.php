@@ -14,6 +14,6 @@ final class RequestMap {
     /** @var string */
     public $method = 'GET';
     
-    /** @var array */
+    /** @var array<string> */
     public $headers;
 }

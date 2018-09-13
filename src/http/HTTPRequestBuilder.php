@@ -1,8 +1,8 @@
 <?php
 
-namespace ndebugs\fall\net;
+namespace ndebugs\fall\http;
 
-use ndebugs\fall\io\FileInputStream;
+use ndebugs\fall\io\InputStream;
 use ndebugs\fall\net\Path;
 use ndebugs\fall\net\QueryString;
 use ndebugs\fall\net\URL;
@@ -17,7 +17,7 @@ class HTTPRequestBuilder {
     private $query;
     private $version;
     private $headers = [];
-    private $body;
+    private $content;
     
     public function setMethod($method) {
         $this->method = $method;
@@ -48,7 +48,9 @@ class HTTPRequestBuilder {
         $this->path = Path::parseURL($pathString);
         
         $queryString = parse_url($uri, PHP_URL_QUERY);
-        $this->query = QueryString::parse($queryString);
+        if ($queryString) {
+            $this->query = QueryString::parse($queryString);
+        }
         
         return $this;
     }
@@ -65,8 +67,8 @@ class HTTPRequestBuilder {
         return $this;
     }
     
-    public function setBody(FileInputStream $body) {
-        $this->body = $body;
+    public function setContent(InputStream $content) {
+        $this->content = $content;
         
         return $this;
     }
@@ -85,7 +87,7 @@ class HTTPRequestBuilder {
         
         $request->setVersion($this->version);
         $request->setHeaders($this->headers);
-        $request->setBody($this->body);
+        $request->setContent($this->content);
         
         return $request;
     }

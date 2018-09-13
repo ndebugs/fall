@@ -4,10 +4,8 @@ namespace ndebugs\fall\adapter;
 
 use ndebugs\fall\annotation\DataTypeAdapter;
 
-/**
- * @DataTypeAdapter("int")
- */
-class IntegerAdapter implements TypeAdapter {
+/** @DataTypeAdapter("integer") */
+class IntegerAdapter implements TypeAdaptable {
     
     public function unmarshall($value) {
         return intval($value);

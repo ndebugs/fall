@@ -2,12 +2,12 @@
 
 namespace ndebugs\fall\io;
 
-class FileInputStream extends InputStream {
+class StandardInputStream extends InputStream {
     
     private $stream;
     
-    public function __construct($path) {
-        $this->stream = fopen($path, 'r');
+    public function __construct() {
+        $this->stream = fopen('php://input', 'r');
     }
 
     public function hasNext() {
@@ -34,8 +34,8 @@ class FileInputStream extends InputStream {
         return fclose($this->stream);
     }
     
-    public static function readAll($path, $buffer = InputStream::DEFAULT_READ_BUFFER) {
-        $in = new FileInputStream($path);
+    public static function readAll($buffer = InputStream::DEFAULT_READ_BUFFER) {
+        $in = new StandardInputStream();
         $data = '';
         while ($in->hasNext()) {
             $data .= $in->read($buffer);

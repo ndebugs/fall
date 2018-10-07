@@ -13,12 +13,15 @@ use ndebugs\fall\web\TypedModel;
 /** @ResponseFilter(TypedModel::class) */
 class TypedModelResponseFilter implements ResponseFilterable {
     
-    /** @Autowired(ApplicationContext::class) */
+    /**
+     * @var ApplicationContext
+     * @Autowired
+     */
     public $context;
     
     private function marshall(TypedModel $model) {
         $value = $model->getValue();
-        $type = is_object($value) ? get_class($value) : gettype($value);
+        $type = get_class($value);
         $dataAdapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type);
         $adaptedValue = $dataAdapter ? $dataAdapter->marshall($value) : null;
         

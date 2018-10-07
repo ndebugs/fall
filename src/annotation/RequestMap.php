@@ -7,13 +7,13 @@ namespace ndebugs\fall\annotation;
  * @Target("METHOD")
  */
 final class RequestMap {
-    
+
     /** @var string */
     public $path = '';
     
     /** @var string */
     public $method = 'GET';
     
-    /** @var array<string> */
+    /** @var string[] */
     public $headers;
 }

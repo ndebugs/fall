@@ -7,5 +7,5 @@ namespace ndebugs\fall\annotation;
  * @Target("METHOD")
  */
 final class PostConstruct {
-    
+
 }

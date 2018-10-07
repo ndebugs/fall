@@ -2,14 +2,16 @@
 
 namespace ndebugs\fall\context;
 
-use ReflectionClass;
 use Composer\Autoload\ClassLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use ndebugs\fall\annotation\Component;
 use ndebugs\fall\annotation\TypeAdapter;
 use ndebugs\fall\annotation\TypeFilter;
+use ndebugs\fall\reflection\MetaClass;
 use ndebugs\fall\util\Strings;
+use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\ContextFactory;
 
 class ApplicationContext {
     
@@ -20,22 +22,22 @@ class ApplicationContext {
         'web_directory' => './web'
     ];
     
-    private $componentContexts;
+    private $componentContexts = [];
     
     public function __construct(ClassLoader $classLoader, $properties) {
         $this->mergeProperties($properties);
         
-        $this->componentContexts = [
-            self::class => new ComponentContext(self::class, null, $this)
-        ];
-        
         AnnotationRegistry::registerLoader('class_exists');
-        $reader = new AnnotationReader();
         
-        $basePackages = $this->properties['scan_packages'];
+        $this->setComponent($this);
+        $this->setComponent(new AnnotationReader());
+        $this->setComponent(DocBlockFactory::createInstance());
+        $this->setComponent(new ContextFactory());
+        
         $classes = array_keys($classLoader->getClassMap());
+        $basePackages = $this->properties['scan_packages'];
         foreach ($classes as $class) {
-            $this->scanPackages($reader, $basePackages, $class);
+            $this->scanPackages($basePackages, $class);
         }
     }
     
@@ -50,20 +52,20 @@ class ApplicationContext {
         }
     }
     
-    private function scanPackage(AnnotationReader $reader, $basePackage, $class) {
+    private function scanPackage($basePackage, $class) {
         if (Strings::startsWith($class, $basePackage)) {
-            $reflection = new ReflectionClass($class);
-            $type = $reader->getClassAnnotation($reflection, Component::class);
+            $reflection = new MetaClass($class);
+            $type = $reflection->getAnnotation($this, Component::class);
             if ($type) {
-                return $this->componentContexts[$class] = new ComponentContext($class, $type);
+                return $this->componentContexts[$class] = new ComponentContext($this, $reflection);
             }
         }
         return null;
     }
     
-    private function scanPackages(AnnotationReader $reader, $basePackages, $class) {
+    private function scanPackages($basePackages, $class) {
         foreach ($basePackages as $basePackage) {
-            $context = $this->scanPackage($reader, $basePackage, $class);
+            $context = $this->scanPackage($basePackage, $class);
             if ($context) {
                 return $context;
             }
@@ -74,6 +76,10 @@ class ApplicationContext {
         return isset($this->properties[$key]) ? $this->properties[$key] : null;
     }
     
+    public function getAnnotationReader() {
+        return $this->annotationReader;
+    }
+
     public function getComponent($class) {
         if (isset($this->componentContexts[$class])) {
             $context = $this->componentContexts[$class];
@@ -83,22 +89,28 @@ class ApplicationContext {
         }
     }
     
-    public function getComponentMap($type = null) {
-        $map = [];
+    public function setComponent($object) {
+        $context = new ComponentContext($this, new MetaClass($object), $object);
+        $this->componentContexts[get_class($object)] = $context;
+    }
+    
+    public function getComponentContexts($type = null) {
+        $contexts = [];
         foreach ($this->componentContexts as $context) {
-            if ($type === null || $context->getType() instanceof $type) {
-                $map[$context->getClass()] = $context->getType();
+            $contextType = $context->getType();
+            if ($type === null || $contextType instanceof $type) {
+                $contexts[] = $context;
             }
         }
-        return $map;
+        return $contexts;
     }
     
     public function getTypeAdapter($class, $type) {
         foreach ($this->componentContexts as $context) {
-            $componentType = $context->getType();
-            if ($componentType instanceof TypeAdapter &&
-                    $componentType instanceof $class &&
-                    $componentType->hasType($type)) {
+            $contextType = $context->getType();
+            if ($contextType instanceof TypeAdapter &&
+                    $contextType instanceof $class &&
+                    $contextType->hasType($type)) {
                 return $context->getValue($this);
             }
         }
@@ -107,10 +119,10 @@ class ApplicationContext {
     
     public function getTypeFilter($class, $object) {
         foreach ($this->componentContexts as $context) {
-            $componentType = $context->getType();
-            if ($componentType instanceof TypeFilter &&
-                    $componentType instanceof $class &&
-                    $componentType->matchType($object)) {
+            $contextType = $context->getType();
+            if ($contextType instanceof TypeFilter &&
+                    $contextType instanceof $class &&
+                    $contextType->matchType($object)) {
                 return $context->getValue($this);
             }
         }

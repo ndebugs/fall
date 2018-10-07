@@ -10,7 +10,10 @@ use ndebugs\fall\util\Strings;
 /** @Component */
 class TemplateFunction {
     
-    /** @Autowired(ApplicationContext::class) */
+    /**
+     * @var ApplicationContext
+     * @Autowired
+     */
     public $context;
     
     public function url($path) {

@@ -24,10 +24,16 @@ use ndebugs\fall\web\HTTPNotFoundException;
 /** @Component */
 class RouteManager {
     
-    /** @Autowired(ApplicationContext::class) */
+    /**
+     * @var ApplicationContext
+     * @Autowired
+     */
     public $context;
     
-    /** @Autowired(HTTPManager::class) */
+    /**
+     * @var HTTPManager
+     * @Autowired
+     */
     public $httpManager;
     
     private $routeGroups = [];
@@ -35,24 +41,27 @@ class RouteManager {
     
     /** @PostConstruct */
     public function init() {
-        $componentMap = $this->context->getComponentMap(Controller::class);
-        foreach ($componentMap as $class => $type) {
+        $contexts = $this->context->getComponentContexts(Controller::class);
+        foreach ($contexts as $context) {
+            $type = $context->getType();
+            
             $routeGroup = new RouteGroup();
+            $routeGroup->setMetadata($context->getReflection());
             $routeGroup->setPath(Path::parseURL($type->path));
-            $routeGroup->setController($class);
 
-            $this->routeGroups[$class] = $routeGroup;
+            $this->routeGroups[] = $routeGroup;
         }
     }
     
     public function getRoutes(RouteGroup $routeGroup) {
-        if (!isset($this->routes[$routeGroup->getController()])) {
-            $loader = new RouteLoader($routeGroup);
+        $class = $routeGroup->getMetadata()->getName();
+        if (!isset($this->routes[$class])) {
+            $loader = new RouteLoader($this->context, $routeGroup);
             $routes = $loader->loadAll();
             
-            return $this->routes[$routeGroup->getController()] = $routes;
+            return $this->routes[$class] = $routes;
         } else {
-            return $this->routes[$routeGroup->getController()];
+            return $this->routes[$class];
         }
     }
     

@@ -14,10 +14,16 @@ use ndebugs\fall\io\StandardOutputStream;
 /** @Component */
 class HTTPManager {
     
-    /** @Autowired(ApplicationContext::class) */
+    /**
+     * @var ApplicationContext
+     * @Autowired
+     */
     public $context;
     
-    /** @Autowired(FileManager::class) */
+    /**
+     * @var FileManager
+     * @Autowired
+     */
     public $fileManager;
     
     private $request;

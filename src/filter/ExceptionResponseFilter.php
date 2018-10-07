@@ -13,7 +13,10 @@ use ndebugs\fall\web\TemplateManager;
 /** @ResponseFilter(Exception::class) */
 class ExceptionResponseFilter implements ResponseFilterable {
     
-    /** @Autowired(TemplateManager::class) */
+    /**
+     * @var TemplateManager
+     * @Autowired
+     */
     public $templateManager;
     
     public function filter(HTTPResponse $response, $value) {

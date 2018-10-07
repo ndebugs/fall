@@ -2,56 +2,61 @@
 
 namespace ndebugs\fall\context;
 
-use ReflectionClass;
-use Doctrine\Common\Annotations\AnnotationReader;
 use ndebugs\fall\annotation\Autowired;
 use ndebugs\fall\annotation\Component;
 use ndebugs\fall\annotation\PostConstruct;
+use ndebugs\fall\reflection\MetaClass;
 
 class ComponentContext {
     
-    private $class;
+    private $context;
     private $type;
+    private $reflection;
     private $value;
     
-    public function __construct($class, Component $type = null, $value = null) {
-        $this->class = $class;
-        $this->type = $type;
+    public function __construct(ApplicationContext $context, MetaClass $reflection, $value = null) {
+        $this->context = $context;
+        $this->reflection = $reflection;
         $this->value = $value;
     }
     
-    public function getClass() {
-        return $this->class;
+    public function getContext() {
+        return $this->context;
     }
 
     public function getType() {
+        if (!$this->type) {
+            $this->type = $this->reflection->getAnnotation($this->context, Component::class);
+        }
+        
         return $this->type;
     }
 
-    public function getValue(ApplicationContext $context) {
+    public function getReflection() {
+        return $this->reflection;
+    }
+
+    public function getValue() {
         if (!$this->value) {
-            $this->value = $this->loadValue($context);
+            $this->value = $this->loadValue();
         }
         
         return $this->value;
     }
     
-    public function loadValue(ApplicationContext $context) {
-        $reflection = new ReflectionClass($this->class);
-        $instance = $reflection->newInstanceArgs();
+    public function loadValue() {
+        $instance = $this->reflection->newInstanceArgs();
         
-        $reader = new AnnotationReader();
-        
-        foreach ($reflection->getProperties() as $property) {
-            $annotation = $reader->getPropertyAnnotation($property, Autowired::class);
+        foreach ($this->reflection->getMetaProperties() as $property) {
+            $annotation = $property->getAnnotation($this->context, Autowired::class);
             if ($annotation) {
-                $value = $context->getComponent($annotation->type);
+                $value = $this->context->getComponent($property->getType($this->context));
                 $property->setValue($instance, $value);
             }
         }
         
-        foreach ($reflection->getMethods() as $method) {
-            $annotation = $reader->getMethodAnnotation($method, PostConstruct::class);
+        foreach ($this->reflection->getMetaMethods() as $method) {
+            $annotation = $method->getAnnotation($this->context, PostConstruct::class);
             if ($annotation) {
                 $method->invoke($instance);
                 break;

@@ -11,7 +11,10 @@ use ndebugs\fall\io\File;
 /** @Component */
 class FileManager {
     
-    /** @Autowired(ApplicationContext::class) */
+    /**
+     * @var ApplicationContext
+     * @Autowired
+     */
     public $context;
     
     private $tempDir;

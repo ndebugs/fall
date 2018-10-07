@@ -7,7 +7,7 @@ namespace ndebugs\fall\annotation;
  * @Target("METHOD")
  */
 final class Roles {
-    
-    /** @var array<string> */
+
+    /** @var string[] */
     public $values;
 }

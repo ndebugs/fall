@@ -8,7 +8,7 @@ namespace ndebugs\fall\annotation;
  */
 final class DocumentTypeAdapter extends TypeAdapter {
     
-    /** @var array<string> */
+    /** @var string[] */
     public $types;
     
     public function hasType($type) {

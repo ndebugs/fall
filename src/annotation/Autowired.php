@@ -7,10 +7,5 @@ namespace ndebugs\fall\annotation;
  * @Target("PROPERTY")
  */
 final class Autowired {
-    
-    /**
-     * @var string
-     * @Required
-     */
-    public $type;
+
 }

@@ -2,8 +2,6 @@
 
 namespace ndebugs\fall\annotation;
 
-use ndebugs\fall\annotation\DataTypeAdapter;
-use ndebugs\fall\annotation\DocumentTypeAdapter;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\http\HTTPResponse;
 use ndebugs\fall\web\TypedModel;

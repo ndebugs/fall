@@ -12,12 +12,17 @@ use ndebugs\fall\io\OutputStream;
 /** @Component */
 class TemplateManager {
     
-    /** @Autowired(ApplicationContext::class) */
+    /**
+     * @var ApplicationContext
+     * @Autowired
+     */
     public $context;
     
-    /** @Autowired(TemplateFunction::class) */
+    /**
+     * @var TemplateFunction
+     * @Autowired
+     */
     public $templateFunction;
-    
     
     private function getFile($path) {
         $basePath = $this->context->getProperty('web_directory');

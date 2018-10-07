@@ -70,7 +70,7 @@ class RequestHandler {
             }
         }
         
-        $class = $route->getGroup()->getController();
+        $class = $route->getGroup()->getMetadata()->getName();
         $controller = $this->context->getComponent($class);
         return $method->invokeArgs($controller, $arguments);
     }

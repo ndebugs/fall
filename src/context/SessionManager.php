@@ -8,7 +8,10 @@ use ndebugs\fall\annotation\Component;
 /** @Component */
 class SessionManager {
     
-    /** @Autowired(ApplicationContext::class) */
+    /**
+     * @var ApplicationContext
+     * @Autowired
+     */
     public $context;
     
     private $session;

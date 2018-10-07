@@ -3,18 +3,19 @@
 namespace ndebugs\fall\routing;
 
 use ndebugs\fall\net\Path;
+use ndebugs\fall\reflection\MetaClass;
 
 class RouteGroup {
     
-    private $controller;
+    private $metadata;
     private $path;
     
-    public function getController() {
-        return $this->controller;
+    public function getMetadata() {
+        return $this->metadata;
     }
 
-    public function setController($controller) {
-        $this->controller = $controller;
+    public function setMetadata(MetaClass $metadata) {
+        $this->metadata = $metadata;
     }
 
     public function getPath() {

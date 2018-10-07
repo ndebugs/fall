@@ -2,35 +2,36 @@
 
 namespace ndebugs\fall\routing;
 
-use ReflectionClass;
-use ReflectionMethod;
-use Doctrine\Common\Annotations\AnnotationReader;
 use ndebugs\fall\annotation\RequestAttribute;
 use ndebugs\fall\annotation\RequestMap;
 use ndebugs\fall\annotation\ResponseAttribute;
 use ndebugs\fall\annotation\Roles;
+use ndebugs\fall\context\ApplicationContext;
+use ndebugs\fall\reflection\MetaMethod;
 use ndebugs\fall\routing\RouteGroup;
 
 class RouteLoader {
     
+    private $context;
     private $group;
     
-    public function __construct(RouteGroup $group) {
+    public function __construct(ApplicationContext $context, RouteGroup $group) {
+        $this->context = $context;
         $this->group = $group;
     }
 
-    public function load(AnnotationReader $reader, ReflectionMethod $method) {
-        $requestMap = $reader->getMethodAnnotation($method, RequestMap::class);
+    public function load(MetaMethod $method) {
+        $requestMap = $method->getAnnotation($this->context, RequestMap::class);
         if ($requestMap) {
             $builder = new RouteBuilder();
             
-            $roles = $reader->getMethodAnnotation($method, Roles::class);
+            $roles = $method->getAnnotation($this->context, Roles::class);
             $builder->setGroup($this->group)
                     ->setAction($method)
                     ->setRequestMap($requestMap)
                     ->setRoles($roles);
             
-            $annotations = $reader->getMethodAnnotations($method);
+            $annotations = $method->getAnnotations($this->context);
             foreach ($annotations as $annotation) {
                 if ($annotation instanceof RequestAttribute) {
                     $builder->addRequestAttribute($annotation);
@@ -46,12 +47,11 @@ class RouteLoader {
     }
     
     public function loadAll() {
-        $reflection = new ReflectionClass($this->group->getController());
-        $reader = new AnnotationReader();
+        $reflection = $this->group->getMetadata();
         
         $routes = [];
-        foreach ($reflection->getMethods() as $method) {
-            $route = $this->load($reader, $method);
+        foreach ($reflection->getMetaMethods() as $method) {
+            $route = $this->load($method);
             if ($route) {
                 $routes[] = $route;
             }

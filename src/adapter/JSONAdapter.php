@@ -2,20 +2,28 @@
 
 namespace ndebugs\fall\adapter;
 
-use ndebugs\fall\annotation\DocumentTypeAdapter;
+use ndebugs\fall\annotation\TypeAdapter;
 
 /**
- * @DocumentTypeAdapter({
+ * @TypeAdapter({
  *  "application/json",
  *  "application/javascript"
  * })
  */
-class JSONAdapter implements TypeAdaptable {
+class JSONAdapter implements DocumentTypeAdaptable {
     
+    /**
+     * @param string $value
+     * @return mixed
+     */
     public function unmarshall($value) {
         return json_decode($value, true);
     }
     
+    /**
+     * @param mixed $value
+     * @return string
+     */
     public function marshall($value) {
         return json_encode($value);
     }

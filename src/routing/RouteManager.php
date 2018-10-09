@@ -36,23 +36,33 @@ class RouteManager {
      */
     public $httpManager;
     
+    /** @var RouteGroup[] */
     private $routeGroups = [];
+    
+    /** @var array */
     private $routes = [];
     
-    /** @PostConstruct */
+    /**
+     * @return void
+     * @PostConstruct
+     */
     public function init() {
         $contexts = $this->context->getComponentContexts(Controller::class);
         foreach ($contexts as $context) {
-            $type = $context->getType();
+            $type = $context->getType($this->context);
             
             $routeGroup = new RouteGroup();
-            $routeGroup->setMetadata($context->getReflection());
+            $routeGroup->setMetadata($context->getMetadata());
             $routeGroup->setPath(Path::parseURL($type->path));
 
             $this->routeGroups[] = $routeGroup;
         }
     }
     
+    /**
+     * @param RouteGroup $routeGroup
+     * @return Route[]
+     */
     public function getRoutes(RouteGroup $routeGroup) {
         $class = $routeGroup->getMetadata()->getName();
         if (!isset($this->routes[$class])) {
@@ -65,6 +75,12 @@ class RouteManager {
         }
     }
     
+    /**
+     * @param PathEvaluator $evaluator
+     * @param integer $offset
+     * @param RouteGroup $routeGroup
+     * @return RequestContext
+     */
     private function evaluateGroup(PathEvaluator $evaluator, $offset, RouteGroup $routeGroup) {
         $path = $routeGroup->getPath();
         $nextOffset = $evaluator->next($path, $offset);
@@ -82,6 +98,10 @@ class RouteManager {
         return null;
     }
     
+    /**
+     * @param PathEvaluator $evaluator
+     * @return RequestContext
+     */
     private function evaluateGroups(PathEvaluator $evaluator) {
         $baseURL = $this->context->getProperty('base_url');
         $basePath = Path::parseURL($baseURL);
@@ -99,6 +119,11 @@ class RouteManager {
         return null;
     }
     
+    /**
+     * @param HTTPRequest $request
+     * @param HTTPResponse $response
+     * @return void
+     */
     public function process(HTTPRequest $request, HTTPResponse $response) {
         $result = null;
         $responseAttribute = null;

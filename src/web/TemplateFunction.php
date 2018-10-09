@@ -16,15 +16,27 @@ class TemplateFunction {
      */
     public $context;
     
+    /**
+     * @param string $path
+     * @return string
+     */
     public function url($path) {
         $baseURL = $this->context->getProperty('base_url');
         return !Strings::startsWith($path, $baseURL) ? $baseURL . $path : $path;
     }
     
+    /**
+     * @param string $path
+     * @return void
+     */
     public function js($path) {
         echo '<script type="text/javascript" src="' . $this->url($path) . '"></script>';
     }
     
+    /**
+     * @param string $path
+     * @return void
+     */
     public function css($path) {
         echo '<link rel="stylesheet" href="' . $this->url($path) . '">';
     }

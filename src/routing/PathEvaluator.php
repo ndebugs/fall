@@ -7,16 +7,24 @@ use ndebugs\fall\net\Path;
 
 class PathEvaluator {
     
+    /** @var HTTPRequest */
     private $request;
     
+    /** @param HTTPRequest */
     public function __construct(HTTPRequest $request) {
         $this->request = $request;
     }
 
+    /** @return HTTPRequest */
     public function getRequest() {
         return $this->request;
     }
 
+	/**
+	 * @param Path $path
+	 * @param integer $offset
+	 * @return string[]
+	 */
     public function evaluate(Path $path, $offset) {
         $requestPath = $this->request->getURL()->getPath();
         
@@ -31,6 +39,11 @@ class PathEvaluator {
         return $result;
     }
     
+	/**
+	 * @param Path $path
+	 * @param integer $offset [optional]
+	 * @return integer
+	 */
     public function next(Path $path, $offset = 0) {
         $requestPath = $this->request->getURL()->getPath();
         if ($offset === 0 && $requestPath->isAbsolute()) {

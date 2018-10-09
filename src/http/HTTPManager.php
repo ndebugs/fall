@@ -5,6 +5,7 @@ namespace ndebugs\fall\http;
 use ndebugs\fall\annotation\Autowired;
 use ndebugs\fall\annotation\Component;
 use ndebugs\fall\context\ApplicationContext;
+use ndebugs\fall\http\HTTPRequest;
 use ndebugs\fall\io\FileInputStream;
 use ndebugs\fall\io\FileManager;
 use ndebugs\fall\io\FileOutputStream;
@@ -26,8 +27,10 @@ class HTTPManager {
      */
     public $fileManager;
     
+    /** @var HTTPRequest */
     private $request;
     
+    /** @return HTTPRequest */
     public function getRequest() {
         if (!$this->request) {
             $this->request = $this->createRequest();
@@ -36,12 +39,13 @@ class HTTPManager {
         return $this->request;
     }
     
+    /** @return HTTPRequest */
     private function createRequest() {
         $builder = new HTTPRequestBuilder();
         $builder->setMethod(filter_input(INPUT_SERVER, 'REQUEST_METHOD'))
                 ->setScheme(filter_input(INPUT_SERVER, 'REQUEST_SCHEME'))
                 ->setHost(filter_input(INPUT_SERVER, 'HTTP_HOST'))
-                ->setPort(filter_input(INPUT_SERVER, 'SERVER_PORT'))
+                ->setPort((int) filter_input(INPUT_SERVER, 'SERVER_PORT'))
                 ->setURI(filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL))
                 ->setVersion(filter_input(INPUT_SERVER, 'SERVER_PROTOCOL'));
         
@@ -65,6 +69,7 @@ class HTTPManager {
         return $builder->build();
     }
     
+    /** @return HTTPResponse */
     public function createResponse() {
         $response = new HTTPResponse();
         

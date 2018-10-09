@@ -9,54 +9,66 @@ use ndebugs\fall\reflection\MetaClass;
 
 class ComponentContext {
     
-    private $context;
+    /** @var Component */
     private $type;
-    private $reflection;
+    
+    /** @var MetaClass */
+    private $metadata;
+    
+    /** @var object */
     private $value;
     
-    public function __construct(ApplicationContext $context, MetaClass $reflection, $value = null) {
-        $this->context = $context;
-        $this->reflection = $reflection;
+    /**
+     * @param MetaClass $metadata
+     * @param object $value [optional]
+     */
+    public function __construct(MetaClass $metadata, $value = null) {
+        $this->metadata = $metadata;
         $this->value = $value;
     }
     
+    /** @return ApplicationContext */
     public function getContext() {
         return $this->context;
     }
 
-    public function getType() {
+    /** @return Component */
+    public function getType(ApplicationContext $context) {
         if (!$this->type) {
-            $this->type = $this->reflection->getAnnotation($this->context, Component::class);
+            $this->type = $this->metadata->getAnnotation($context, Component::class);
         }
         
         return $this->type;
     }
 
-    public function getReflection() {
-        return $this->reflection;
+    /** @return MetaClass */
+    public function getMetadata() {
+        return $this->metadata;
     }
 
-    public function getValue() {
+    /** @return object */
+    public function getValue(ApplicationContext $context) {
         if (!$this->value) {
-            $this->value = $this->loadValue();
+            $this->value = $this->loadValue($context);
         }
         
         return $this->value;
     }
     
-    public function loadValue() {
-        $instance = $this->reflection->newInstanceArgs();
+    /** @return object */
+    public function loadValue(ApplicationContext $context) {
+        $instance = $this->metadata->newInstanceArgs();
         
-        foreach ($this->reflection->getMetaProperties() as $property) {
-            $annotation = $property->getAnnotation($this->context, Autowired::class);
+        foreach ($this->metadata->getMetaProperties() as $property) {
+            $annotation = $property->getAnnotation($context, Autowired::class);
             if ($annotation) {
-                $value = $this->context->getComponent($property->getType($this->context));
+                $value = $context->getComponent($property->getType($context));
                 $property->setValue($instance, $value);
             }
         }
         
-        foreach ($this->reflection->getMetaMethods() as $method) {
-            $annotation = $method->getAnnotation($this->context, PostConstruct::class);
+        foreach ($this->metadata->getMetaMethods() as $method) {
+            $annotation = $method->getAnnotation($context, PostConstruct::class);
             if ($annotation) {
                 $method->invoke($instance);
                 break;

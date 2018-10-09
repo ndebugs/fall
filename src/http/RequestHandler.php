@@ -2,17 +2,28 @@
 
 namespace ndebugs\fall\http;
 
-use ndebugs\fall\annotation\DataTypeAdapter;
+use ndebugs\fall\adapter\ObjectTypeAdaptable;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\context\RequestContext;
 
 class RequestHandler {
     
+    /** @var ApplicationContext */
     private $context;
+    
+    /** @var RequestContext */
     private $requestContext;
+    
+    /** @var object[] */
     private $typeArguments = [];
+    
+    /** @var array */
     private $arguments = [];
     
+    /**
+     * @param ApplicationContext $context
+     * @param RequestContext $requestContext
+     */
     public function __construct(ApplicationContext $context, RequestContext $requestContext) {
         $this->context = $context;
         $this->requestContext = $requestContext;
@@ -20,6 +31,7 @@ class RequestHandler {
         $this->init();
     }
 
+    /** @return void */
     private function init() {
         $route = $this->requestContext->getRoute();
         $attributes = $route->getRequestAttributes();
@@ -31,6 +43,11 @@ class RequestHandler {
         }
     }
     
+    /**
+     * @param string $key
+     * @param string $type [optional]
+     * @return mixed
+     */
     public function getArgument($key, $type = null) {
         $value = null;
         if ($type && isset($this->typeArguments[$type])) {
@@ -44,14 +61,24 @@ class RequestHandler {
         }
     }
     
+    /**
+     * @param object $value
+     * @return void
+     */
     public function setTypeArgument($value) {
         $this->typeArguments[get_class($value)] = $value;
     }
     
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return void
+     */
     public function setArgument($key, $value) {
         $this->arguments[$key] = $value;
     }
     
+    /** @return mixed */
     public function process() {
         $route = $this->requestContext->getRoute();
         $method = $route->getAction();
@@ -63,8 +90,8 @@ class RequestHandler {
             
             $argument = $this->getArgument($key, $type);
             if ($type && !$argument instanceof $type) {
-                $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type);
-                $arguments[] = $adapter ? $adapter->unmarshall($argument) : $argument;
+                $adapter = $this->context->getTypeAdapter(ObjectTypeAdaptable::class, $type);
+                $arguments[] = $adapter ? $adapter->wrap($argument) : $argument;
             } else {
                 $arguments[] = $argument;
             }

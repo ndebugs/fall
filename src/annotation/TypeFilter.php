@@ -2,7 +2,24 @@
 
 namespace ndebugs\fall\annotation;
 
-abstract class TypeFilter extends Component {
+/**
+ * @Annotation
+ * @Target("CLASS")
+ */
+final class TypeFilter extends Component {
     
-    public abstract function matchType($value);
+    /**
+     * @var string
+     * @Required
+     */
+    public $type;
+    
+    /**
+     * @param mixed $value
+     * @return boolean
+     */
+    public function matchType($value) {
+        return is_object($value) ?
+            $value instanceof $this->type : gettype($value) == $this->type;
+    }
 }

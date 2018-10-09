@@ -4,13 +4,13 @@ namespace ndebugs\fall\filter;
 
 use Exception;
 use ndebugs\fall\annotation\Autowired;
-use ndebugs\fall\annotation\ResponseFilter;
+use ndebugs\fall\annotation\TypeFilter;
 use ndebugs\fall\http\HTTPException;
 use ndebugs\fall\http\HTTPResponse;
 use ndebugs\fall\web\HTTPInternalServerErrorException;
 use ndebugs\fall\web\TemplateManager;
 
-/** @ResponseFilter(Exception::class) */
+/** @TypeFilter(Exception::class) */
 class ExceptionResponseFilter implements ResponseFilterable {
     
     /**
@@ -19,6 +19,11 @@ class ExceptionResponseFilter implements ResponseFilterable {
      */
     public $templateManager;
     
+    /**
+     * @param HTTPResponse $response
+     * @param mixed $value
+     * @return void
+     */
     public function filter(HTTPResponse $response, $value) {
         $error = !$value instanceof HTTPException ?
                 new HTTPInternalServerErrorException($value->getMessage(), $value) : $value;

@@ -2,19 +2,27 @@
 
 namespace ndebugs\fall\adapter;
 
-use ndebugs\fall\annotation\DataTypeAdapter;
+use ndebugs\fall\annotation\TypeAdapter;
 
-/** @DataTypeAdapter("boolean") */
-class BooleanAdapter implements TypeAdaptable {
+/** @TypeAdapter("boolean") */
+class BooleanAdapter implements DataTypeAdaptable {
     
     const TRUE_VALUE = 'true';
     const FALSE_VALUE = 'false';
     
-    public function unmarshall($value) {
+    /**
+     * @param mixed $value
+     * @return boolean
+     */
+    public function parse($value) {
         return $value === BooleanAdapter::TRUE_VALUE;
     }
     
-    public function marshall($value) {
+    /**
+     * @param boolean $value
+     * @return string
+     */
+    public function toString($value) {
         return $value ? BooleanAdapter::TRUE_VALUE : BooleanAdapter::FALSE_VALUE;
     }
 }

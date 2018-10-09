@@ -2,7 +2,20 @@
 
 namespace ndebugs\fall\annotation;
 
-abstract class TypeAdapter extends Component {
+/**
+ * @Annotation
+ * @Target("CLASS")
+ */
+final class TypeAdapter extends Component {
     
-    public abstract function hasType($type);
+    /** @var string[] */
+    public $types;
+    
+    /**
+     * @param string $type
+     * @return boolean
+     */
+    public function hasType($type) {
+        return in_array($type, $this->types, true);
+    }
 }

@@ -14,8 +14,10 @@ class SessionManager {
      */
     public $context;
     
+    /** @var Session */
     private $session;
     
+    /** @return Session */
     public function getSession() {
         if (!$this->session) {
             $this->session = $this->createSession();
@@ -24,6 +26,7 @@ class SessionManager {
         return $this->session;
     }
     
+    /** @return Session */
     private function createSession() {
         $session = new Session();
         $session->setId(session_id());

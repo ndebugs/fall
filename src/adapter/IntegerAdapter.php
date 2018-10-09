@@ -2,16 +2,24 @@
 
 namespace ndebugs\fall\adapter;
 
-use ndebugs\fall\annotation\DataTypeAdapter;
+use ndebugs\fall\annotation\TypeAdapter;
 
-/** @DataTypeAdapter("integer") */
-class IntegerAdapter implements TypeAdaptable {
+/** @TypeAdapter("integer") */
+class IntegerAdapter implements DataTypeAdaptable {
     
-    public function unmarshall($value) {
+    /**
+     * @param mixed $value
+     * @return integer
+     */
+    public function parse($value) {
         return intval($value);
     }
     
-    public function marshall($value) {
+    /**
+     * @param integer $value
+     * @return string
+     */
+    public function toString($value) {
         return (string) $value;
     }
 }

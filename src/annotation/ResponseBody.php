@@ -15,6 +15,12 @@ final class ResponseBody extends ResponseAttribute {
     /** @var string */
     public $type = 'application/json';
     
+    /**
+     * @param ApplicationContext $context
+     * @param HTTPResponse $response
+     * @param mixed $value
+     * @return TypedModel
+     */
     public function evaluate(ApplicationContext $context, HTTPResponse $response, $value) {
         return new TypedModel($this->type, $value);
     }

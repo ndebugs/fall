@@ -17,15 +17,25 @@ class FileManager {
      */
     public $context;
     
+    /** @var File */
     private $tempDir;
+    
+    /** @var File[] */
     private $tempFiles = [];
     
-    /** @PostConstruct */
+    /**
+     * @return void
+     * @PostConstruct
+     */
     public function init() {
         $this->tempDir = new File($this->context->getProperty('temp_directory'));
         $this->tempDir->mkdir(true);
     }
     
+    /**
+     * @param string $prefix
+     * @return File
+     */
     public function createTempFile($prefix) {
         $path = tempnam($this->tempDir, $prefix);
         if ($path !== false) {
@@ -38,6 +48,7 @@ class FileManager {
         }
     }
     
+    /** @return void */
     public function __destruct() {
         foreach ($this->tempFiles as $tempFile) {
             $tempFile->delete();

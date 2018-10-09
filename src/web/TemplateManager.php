@@ -24,6 +24,10 @@ class TemplateManager {
      */
     public $templateFunction;
     
+    /**
+     * @param string $path
+     * @return File
+     */
     private function getFile($path) {
         $basePath = $this->context->getProperty('web_directory');
         $file = new File($basePath . DIRECTORY_SEPARATOR . $path);
@@ -39,6 +43,10 @@ class TemplateManager {
         return null;
     }
     
+    /**
+     * @param HTTPException $error
+     * @return File
+     */
     private function getErrorFile(HTTPException $error) {
         $basePath = $this->context->getProperty('web_directory');
         $errorDir = new File($basePath . DIRECTORY_SEPARATOR . 'error');
@@ -56,6 +64,12 @@ class TemplateManager {
         return null;
     }
     
+    /**
+     * @param File $file
+     * @param OutputStream $out
+     * @param array $parameters [optional]
+     * @return void
+     */
     private function renderFile(File $file, OutputStream $out, array $parameters = null) {
         if ($parameters === null) {
             $parameters = [];
@@ -73,6 +87,11 @@ class TemplateManager {
         $out->write($content);
     }
     
+    /**
+     * @param Template $template
+     * @param OutputStream $out
+     * @return void
+     */
     public function render(Template $template, OutputStream $out) {
         $file = $this->getFile($template->getName());
         $parameters = $template->getParameters();
@@ -80,6 +99,11 @@ class TemplateManager {
         $this->renderFile($file, $out, $parameters);
     }
     
+    /**
+     * @param HTTPException $error
+     * @param OutputStream $out
+     * @return void
+     */
     public function renderError(HTTPException $error, OutputStream $out) {
         $file = $this->getErrorFile($error);
         if ($file) {

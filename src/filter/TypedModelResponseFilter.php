@@ -2,15 +2,15 @@
 
 namespace ndebugs\fall\filter;
 
+use ndebugs\fall\adapter\DocumentTypeAdaptable;
+use ndebugs\fall\adapter\ObjectTypeAdaptable;
 use ndebugs\fall\annotation\Autowired;
-use ndebugs\fall\annotation\DataTypeAdapter;
-use ndebugs\fall\annotation\DocumentTypeAdapter;
-use ndebugs\fall\annotation\ResponseFilter;
+use ndebugs\fall\annotation\TypeFilter;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\http\HTTPResponse;
 use ndebugs\fall\web\TypedModel;
 
-/** @ResponseFilter(TypedModel::class) */
+/** @TypeFilter(TypedModel::class) */
 class TypedModelResponseFilter implements ResponseFilterable {
     
     /**
@@ -19,16 +19,25 @@ class TypedModelResponseFilter implements ResponseFilterable {
      */
     public $context;
     
+    /**
+     * @param TypedModel $model
+     * @return mixed
+     */
     private function marshall(TypedModel $model) {
         $value = $model->getValue();
         $type = get_class($value);
-        $dataAdapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type);
-        $adaptedValue = $dataAdapter ? $dataAdapter->marshall($value) : null;
+        $dataAdapter = $this->context->getTypeAdapter(ObjectTypeAdaptable::class, $type);
+        $adaptedValue = $dataAdapter ? $dataAdapter->unwrap($value) : null;
         
-        $documentAdapter = $this->context->getTypeAdapter(DocumentTypeAdapter::class, $model->getType());
+        $documentAdapter = $this->context->getTypeAdapter(DocumentTypeAdaptable::class, $model->getType());
         return $documentAdapter ? $documentAdapter->marshall($adaptedValue) : null;
     }
     
+    /**
+     * @param HTTPResponse $response
+     * @param mixed $value
+     * @return void
+     */
     public function filter(HTTPResponse $response, $value) {
         $response->setContentType($value->getType());
         

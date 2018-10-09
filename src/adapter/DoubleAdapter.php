@@ -2,16 +2,24 @@
 
 namespace ndebugs\fall\adapter;
 
-use ndebugs\fall\annotation\DataTypeAdapter;
+use ndebugs\fall\annotation\TypeAdapter;
 
-/** @DataTypeAdapter("double") */
-class DoubleAdapter implements TypeAdaptable {
+/** @TypeAdapter("double") */
+class DoubleAdapter implements DataTypeAdaptable {
     
-    public function unmarshall($value) {
+    /**
+     * @param mixed $value
+     * @return double
+     */
+    public function parse($value) {
         return floatval($value);
     }
     
-    public function marshall($value) {
+    /**
+     * @param double $value
+     * @return string
+     */
+    public function toString($value) {
         return (string) $value;
     }
 }

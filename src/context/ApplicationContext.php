@@ -15,6 +15,7 @@ use phpDocumentor\Reflection\Types\ContextFactory;
 
 class ApplicationContext {
     
+    /** @var array */
     private $properties = [
         'base_url' => '/',
         'scan_packages' => ['ndebugs\\fall'],
@@ -22,9 +23,14 @@ class ApplicationContext {
         'web_directory' => './web'
     ];
     
+    /** @var ComponentContext[] */
     private $componentContexts = [];
     
-    public function __construct(ClassLoader $classLoader, $properties) {
+    /**
+     * @param ClassLoader $classLoader
+     * @param array $properties
+     */
+    public function __construct(ClassLoader $classLoader, array $properties) {
         $this->mergeProperties($properties);
         
         AnnotationRegistry::registerLoader('class_exists');
@@ -41,6 +47,10 @@ class ApplicationContext {
         }
     }
     
+    /**
+     * @param array $properties
+     * @return void
+     */
     private function mergeProperties($properties) {
         foreach ($properties as $key => $value) {
             if (is_array($value) && isset($this->properties[$key]) &&
@@ -52,17 +62,27 @@ class ApplicationContext {
         }
     }
     
+    /**
+     * @param string $basePackage
+     * @param string $class
+     * @return ComponentContext
+     */
     private function scanPackage($basePackage, $class) {
         if (Strings::startsWith($class, $basePackage)) {
             $reflection = new MetaClass($class);
             $type = $reflection->getAnnotation($this, Component::class);
             if ($type) {
-                return $this->componentContexts[$class] = new ComponentContext($this, $reflection);
+                return $this->componentContexts[$class] = new ComponentContext($reflection);
             }
         }
         return null;
     }
     
+    /**
+     * @param string[] $basePackages
+     * @param string $class
+     * @return ComponentContext
+     */
     private function scanPackages($basePackages, $class) {
         foreach ($basePackages as $basePackage) {
             $context = $this->scanPackage($basePackage, $class);
@@ -72,14 +92,18 @@ class ApplicationContext {
         }
     }
     
+    /**
+     * @param string $key
+     * @return mixed
+     */
     public function getProperty($key) {
         return isset($this->properties[$key]) ? $this->properties[$key] : null;
     }
     
-    public function getAnnotationReader() {
-        return $this->annotationReader;
-    }
-
+    /**
+     * @param string $class
+     * @return object
+     */
     public function getComponent($class) {
         if (isset($this->componentContexts[$class])) {
             $context = $this->componentContexts[$class];
@@ -89,15 +113,23 @@ class ApplicationContext {
         }
     }
     
+    /**
+     * @param object $object
+     * @return void
+     */
     public function setComponent($object) {
-        $context = new ComponentContext($this, new MetaClass($object), $object);
+        $context = new ComponentContext(new MetaClass($object), $object);
         $this->componentContexts[get_class($object)] = $context;
     }
     
+    /**
+     * @param string $type [optional]
+     * @return ComponentContext[]
+     */
     public function getComponentContexts($type = null) {
         $contexts = [];
         foreach ($this->componentContexts as $context) {
-            $contextType = $context->getType();
+            $contextType = $context->getType($this);
             if ($type === null || $contextType instanceof $type) {
                 $contexts[] = $context;
             }
@@ -105,11 +137,17 @@ class ApplicationContext {
         return $contexts;
     }
     
+    /**
+     * @param string $class
+     * @param string $type
+     * @return object
+     */
     public function getTypeAdapter($class, $type) {
         foreach ($this->componentContexts as $context) {
-            $contextType = $context->getType();
-            if ($contextType instanceof TypeAdapter &&
-                    $contextType instanceof $class &&
+            $contextType = $context->getType($this);
+            $metadata = $context->getMetadata();
+            if ($metadata->isSubclassOf($class) &&
+                    $contextType instanceof TypeAdapter &&
                     $contextType->hasType($type)) {
                 return $context->getValue($this);
             }
@@ -117,11 +155,17 @@ class ApplicationContext {
         return null;
     }
     
+    /**
+     * @param string $class
+     * @param object $object
+     * @return object
+     */
     public function getTypeFilter($class, $object) {
         foreach ($this->componentContexts as $context) {
-            $contextType = $context->getType();
-            if ($contextType instanceof TypeFilter &&
-                    $contextType instanceof $class &&
+            $contextType = $context->getType($this);
+            $metadata = $context->getMetadata();
+            if ($metadata->isSubclassOf($class) &&
+                    $contextType instanceof TypeFilter &&
                     $contextType->matchType($object)) {
                 return $context->getValue($this);
             }

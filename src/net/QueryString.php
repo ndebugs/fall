@@ -9,16 +9,27 @@ class QueryString {
     const VALUE_DELIMITER = '=';
     const PAIR_DELIMITER = '&';
     
+    /** @var array */
     private $values;
     
+    /** @param array $values [optional] */
     public function __construct(array $values = []) {
         $this->values = $values;
     }
 
+    /**
+     * @param string $key
+     * @return string
+     */
     public function get($key) {
         return isset($this->values[$key]) ? $this->values[$key] : null;
     }
     
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return void
+     */
     public function set($key, $value) {
         if (isset($this->values[$key])) {
             $currentValue = &$this->values[$key];
@@ -35,15 +46,26 @@ class QueryString {
         }
     }
 
+    /** @return array */
     public function getValues() {
         return $this->values;
     }
     
+    /**
+     * @param string $key
+     * @param string $value
+     * @return string
+     */
     private function toPairString($key, $value) {
         return $value !== null ?
             $key . QueryString::VALUE_DELIMITER . $value : $key;
     }
 
+    /**
+     * @param string $key
+     * @param string[] $value
+     * @return void
+     */
     private function toStrings($key, array $values) {
         $result = '';
         foreach ($values as $value) {
@@ -55,6 +77,7 @@ class QueryString {
         return $result;
     }
     
+    /** @return string */
     public function __toString() {
         $result = '';
         foreach ($this->values as $key => $value) {
@@ -69,6 +92,11 @@ class QueryString {
         return $result;
     }
     
+    /**
+     * @param string $value
+     * @param integer $offset [optional]
+     * @return QueryString
+     */
     public static function parse($value, $offset = 0) {
         $parser = new QueryStringParser($value, $offset);
         $result = new QueryString();

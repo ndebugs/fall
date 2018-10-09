@@ -8,12 +8,8 @@ final class Strings {
 
     /**
      * Evaluate if string starts with value
-     * @param string $source <p>
-     * The source string.
-     * </p>
-     * @param string $value <p>
-     * The value string.
-     * </p>
+     * @param string $source The source string.
+     * @param string $value The value string.
      * @return boolean Returns true if <i>source</i> starts with <i>value</i>.
      */
     public static function startsWith($source, $value) {
@@ -22,12 +18,8 @@ final class Strings {
 
     /**
      * Evaluate if string ends with value
-     * @param string $source <p>
-     * The source string.
-     * </p>
-     * @param string $value <p>
-     * The value string.
-     * </p>
+     * @param string $source The source string.
+     * @param string $value The value string.
      * @return boolean Returns true if <i>source</i> ends with <i>value</i>.
      */
     public static function endsWith($source, $value) {

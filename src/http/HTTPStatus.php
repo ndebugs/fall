@@ -52,6 +52,10 @@ class HTTPStatus {
     const CODE_GATEWAY_TIME_OUT = 504;
     const CODE_HTTP_VERSION_NOT_SUPPORTED = 505;
 
+    /**
+     * @param integer $code
+     * @return string
+     */
     public static function description($code) {
         switch ($code) {
             case HTTPStatus::CODE_CONTINUE:

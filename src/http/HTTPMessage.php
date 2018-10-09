@@ -27,5 +27,10 @@ abstract class HTTPMessage {
     const HEADER_EXPIRES = 'Expires';
     const HEADER_LAST_MODIFIED = 'Last-Modified';
     
+    /**
+     * @param string $key
+     * @param string $value
+     * @return void
+     */
     public abstract function setHeader($key, $value);
 }

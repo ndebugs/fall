@@ -12,14 +12,25 @@ use ndebugs\fall\routing\RouteGroup;
 
 class RouteLoader {
     
+    /** @var ApplicationContext */
     private $context;
+    
+    /** @var RouteGroup */
     private $group;
     
+    /**
+     * @param ApplicationContext $context
+     * @param RouteGroup $group
+     */
     public function __construct(ApplicationContext $context, RouteGroup $group) {
         $this->context = $context;
         $this->group = $group;
     }
 
+	/**
+	 * @param MetaMethod $method
+	 * @return Route
+	 */
     public function load(MetaMethod $method) {
         $requestMap = $method->getAnnotation($this->context, RequestMap::class);
         if ($requestMap) {
@@ -46,6 +57,7 @@ class RouteLoader {
         }
     }
     
+	/** @return Route[] */
     public function loadAll() {
         $reflection = $this->group->getMetadata();
         

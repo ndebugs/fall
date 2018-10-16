@@ -2,17 +2,18 @@
 
 namespace ndebugs\fall\adapter;
 
-interface DocumentTypeAdaptable {
+interface TypeParsable {
     
     /**
      * @param string $value
+     * @param string $type [optional]
      * @return mixed
      */
-    public function unmarshall($value);
+    public function parse($value, $type = null);
     
     /**
      * @param mixed $value
      * @return string
      */
-    public function marshall($value);
+    public function toString($value);
 }

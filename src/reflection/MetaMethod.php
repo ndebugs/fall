@@ -43,14 +43,14 @@ class MetaMethod extends ReflectionMethod {
 	 * @return string
 	 */
     public function getType(ApplicationContext $context) {
-        if (!$this->type) {
+        if ($this->type === null) {
             $docblock = $this->getDocBlock($context);
             $tags = $docblock->getTagsByName('return');
             if ($tags) {
                 $type = (string) $tags[0]->getType();
                 $this->type = $type[0] === '\\' ? substr($type, 1) : $type;
             } else {
-                $this->type = 'mixed';
+                $this->type = '';
             }
         }
         

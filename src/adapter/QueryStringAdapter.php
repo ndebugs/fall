@@ -6,13 +6,14 @@ use ndebugs\fall\annotation\TypeAdapter;
 use ndebugs\fall\net\QueryString;
 
 /** @TypeAdapter("application/x-www-form-urlencoded") */
-class QueryStringAdapter implements DocumentTypeAdaptable {
+class QueryStringAdapter extends DocumentTypeAdapter {
     
     /**
      * @param string $value
+     * @param string $type [optional]
      * @return string[]
      */
-    public function unmarshall($value) {
+    public function parse($value, $type = null) {
         $query = QueryString::parse($value);
         return $query->getValues();
     }
@@ -21,7 +22,7 @@ class QueryStringAdapter implements DocumentTypeAdaptable {
      * @param string[] $value
      * @return string
      */
-    public function marshall($value) {
+    public function toString($value) {
         $query = new QueryString($value);
         return (string) $query;
     }

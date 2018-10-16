@@ -2,7 +2,7 @@
 
 namespace ndebugs\fall\http;
 
-use ndebugs\fall\adapter\ObjectTypeAdaptable;
+use ndebugs\fall\adapter\ObjectTypeAdapter;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\context\RequestContext;
 
@@ -90,8 +90,8 @@ class RequestHandler {
             
             $argument = $this->getArgument($key, $type);
             if ($type && !$argument instanceof $type) {
-                $adapter = $this->context->getTypeAdapter(ObjectTypeAdaptable::class, $type);
-                $arguments[] = $adapter ? $adapter->wrap($argument) : $argument;
+                $adapter = $this->context->getTypeAdapter(ObjectTypeAdapter::class, $type, 'object');
+                $arguments[] = $adapter ? $adapter->cast($argument, $type) : $argument;
             } else {
                 $arguments[] = $argument;
             }

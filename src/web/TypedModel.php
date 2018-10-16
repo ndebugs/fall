@@ -7,12 +7,12 @@ class TypedModel {
     /** @var string */
     private $type;
     
-    /** @var object */
+    /** @var mixed */
     private $value;
     
     /**
      * @param string $type
-     * @param object $value
+     * @param mixed $value
      */
     public function __construct($type, $value) {
         $this->type = $type;
@@ -32,13 +32,13 @@ class TypedModel {
         $this->type = $type;
     }
 
-    /** @return object */
+    /** @return mixed */
     public function getValue() {
         return $this->value;
     }
 
     /**
-     * @param object $value
+     * @param mixed $value
      * @return void
      */
     public function setValue($value) {

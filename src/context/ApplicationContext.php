@@ -140,19 +140,23 @@ class ApplicationContext {
     /**
      * @param string $class
      * @param string $type
+     * @param string $defaultType [optional]
      * @return object
      */
-    public function getTypeAdapter($class, $type) {
+    public function getTypeAdapter($class, $type, $defaultType = null) {
+        $defaultAdapter = null;
         foreach ($this->componentContexts as $context) {
             $contextType = $context->getType($this);
             $metadata = $context->getMetadata();
-            if ($metadata->isSubclassOf($class) &&
-                    $contextType instanceof TypeAdapter &&
-                    $contextType->hasType($type)) {
-                return $context->getValue($this);
+            if ($metadata->isSubclassOf($class) && $contextType instanceof TypeAdapter) {
+                if ($contextType->hasType($type)) {
+                    return $context->getValue($this);
+                } else if ($defaultType && $contextType->hasType($defaultType)) {
+                    $defaultAdapter = $context->getValue($this);
+                }
             }
         }
-        return null;
+        return $defaultAdapter;
     }
     
     /**

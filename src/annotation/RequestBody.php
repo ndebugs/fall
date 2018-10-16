@@ -2,7 +2,7 @@
 
 namespace ndebugs\fall\annotation;
 
-use ndebugs\fall\adapter\DataTypeAdaptable;
+use ndebugs\fall\adapter\DataTypeAdapter;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\context\RequestContext;
 
@@ -35,8 +35,8 @@ final class RequestBody extends RequestAttribute {
         $value = $requestContext->getContent($context);
         
         if ($this->type) {
-            $adapter = $context->getTypeAdapter(DataTypeAdaptable::class, $this->type);
-            return $adapter ? $adapter->parse($value) : null;
+            $adapter = $context->getTypeAdapter(DataTypeAdapter::class, $this->type);
+            return $adapter ? $adapter->parse($value, $this->type) : null;
         } else {
             return $value;
         }

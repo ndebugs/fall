@@ -2,7 +2,7 @@
 
 namespace ndebugs\fall\context;
 
-use ndebugs\fall\adapter\DocumentTypeAdaptable;
+use ndebugs\fall\adapter\DocumentTypeAdapter;
 use ndebugs\fall\http\HTTPRequest;
 use ndebugs\fall\io\FileInputStream;
 use ndebugs\fall\routing\Route;
@@ -73,8 +73,12 @@ class RequestContext {
             $in->reset();
             
             $contentType = $this->value->getContentType();
-            $adapter = $contentType ? $context->getTypeAdapter(DocumentTypeAdaptable::class, $contentType) : null;
-            return $adapter ? $adapter->unmarshall($content) : $content;
+            if ($contentType) {
+                $adapter = $context->getTypeAdapter(DocumentTypeAdapter::class, $contentType);
+                return $adapter ? $adapter->parse($content) : $content;
+            } else {
+                return $content;
+            }
         }
         return null;
     }

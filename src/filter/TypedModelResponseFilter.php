@@ -2,8 +2,8 @@
 
 namespace ndebugs\fall\filter;
 
-use ndebugs\fall\adapter\DocumentTypeAdaptable;
-use ndebugs\fall\adapter\ObjectTypeAdaptable;
+use ndebugs\fall\adapter\DataTypeAdapter;
+use ndebugs\fall\adapter\DocumentTypeAdapter;
 use ndebugs\fall\annotation\Autowired;
 use ndebugs\fall\annotation\TypeFilter;
 use ndebugs\fall\context\ApplicationContext;
@@ -21,16 +21,16 @@ class TypedModelResponseFilter implements ResponseFilterable {
     
     /**
      * @param TypedModel $model
-     * @return mixed
+     * @return string
      */
-    private function marshall(TypedModel $model) {
+    private function toString(TypedModel $model) {
         $value = $model->getValue();
-        $type = get_class($value);
-        $dataAdapter = $this->context->getTypeAdapter(ObjectTypeAdaptable::class, $type);
-        $adaptedValue = $dataAdapter ? $dataAdapter->unwrap($value) : null;
+        $type = is_object($value) ? get_class($value) : null;
+        $dataAdapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type, gettype($value));
+        $adaptedValue = $dataAdapter ? $dataAdapter->uncast($value, $type) : $value;
         
-        $documentAdapter = $this->context->getTypeAdapter(DocumentTypeAdaptable::class, $model->getType());
-        return $documentAdapter ? $documentAdapter->marshall($adaptedValue) : null;
+        $documentAdapter = $this->context->getTypeAdapter(DocumentTypeAdapter::class, $model->getType());
+        return $documentAdapter ? $documentAdapter->toString($adaptedValue) : null;
     }
     
     /**
@@ -41,11 +41,11 @@ class TypedModelResponseFilter implements ResponseFilterable {
     public function filter(HTTPResponse $response, $value) {
         $response->setContentType($value->getType());
         
-        $marshalledValue = $this->marshall($value);
+        $stringValue = $this->toString($value);
         
         ob_end_clean();
         
         $out = $response->getContent();
-        $out->write($marshalledValue);
+        $out->write($stringValue);
     }
 }

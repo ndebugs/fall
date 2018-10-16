@@ -10,13 +10,14 @@ use ndebugs\fall\annotation\TypeAdapter;
  *  "application/javascript"
  * })
  */
-class JSONAdapter implements DocumentTypeAdaptable {
+class JSONAdapter extends DocumentTypeAdapter {
     
     /**
      * @param string $value
+     * @param string $type [optional]
      * @return mixed
      */
-    public function unmarshall($value) {
+    public function parse($value, $type = null) {
         return json_decode($value, true);
     }
     
@@ -24,7 +25,7 @@ class JSONAdapter implements DocumentTypeAdaptable {
      * @param mixed $value
      * @return string
      */
-    public function marshall($value) {
+    public function toString($value) {
         return json_encode($value);
     }
 }

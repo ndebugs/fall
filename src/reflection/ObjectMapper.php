@@ -13,11 +13,20 @@ class ObjectMapper {
     /** @var MetaClass */
     private $metadata;
     
+    /**
+     * @param ApplicationContext $context
+     * @param MetaClass $metadata
+     */
     public function __construct(ApplicationContext $context, MetaClass $metadata) {
         $this->context = $context;
         $this->metadata = $metadata;
     }
 
+    /**
+     * @param MetaProperty $property
+     * @param object $object
+     * @return mixed
+     */
     public function getValue(MetaProperty $property, $object) {
         $name = $property->getName();
         $type = null;
@@ -44,6 +53,12 @@ class ObjectMapper {
         return $adapter ? $adapter->uncast($value, $valueType) : $value;
     }
     
+    /**
+     * @param MetaProperty $property
+     * @param object $object
+     * @param mixed $value
+     * @return void
+     */
     public function setValue(MetaProperty $property, $object, $value) {
         $name = $property->getName();
         $type = $property->getType($this->context);
@@ -66,7 +81,7 @@ class ObjectMapper {
     
     /**
      * @param array $values
-     * @return object;
+     * @return object
      */
     public function toObject(array $values) {
         $object = $this->metadata->newInstanceArgs();
@@ -86,7 +101,7 @@ class ObjectMapper {
 
     /**
      * @param object $object
-     * @return array;
+     * @return array
      */
     public function toArray($object) {
         $values = [];

@@ -63,9 +63,8 @@ class ObjectMapper {
         $name = $property->getName();
         $type = $property->getType($this->context);
         
-        $defaultType = gettype($value);
-        $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type, $defaultType);
-        $valueType = $type != $defaultType ? $type : null;
+        $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type, 'mixed');
+        $valueType = $type != gettype($value) ? $type : null;
         $adaptedValue = $adapter ? $adapter->cast($value, $valueType) : $value;
         
         if (!$property->isPublic()) {
@@ -75,7 +74,7 @@ class ObjectMapper {
                 $value = $method->invoke($object, $adaptedValue);
             }
         } else {
-            $value = $property->setValue($object, $adaptedValue);
+            $property->setValue($object, $adaptedValue);
         }
     }
     
@@ -89,10 +88,8 @@ class ObjectMapper {
         $properties = $this->metadata->getMetaProperties();
         foreach ($properties as $property) {
             $name = $property->getName();
-            $value = isset($values[$name]) ? $values[$name] : null;
-            
-            if ($value !== null) {
-                $this->setValue($property, $object, $value);
+            if (array_key_exists($name, $values)) {
+                $this->setValue($property, $object, $values[$name]);
             }
         }
         

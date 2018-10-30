@@ -12,7 +12,10 @@ use ndebugs\fall\context\RequestContext;
  */
 final class PathVariable extends RequestAttribute {
     
-    /** @var string */
+    /**
+     * @var string
+     * @Required
+     */
     public $name;
     
     /** @var string */

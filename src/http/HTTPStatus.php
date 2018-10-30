@@ -25,6 +25,8 @@ class HTTPStatus {
     const CODE_NOT_MODIFIED = 304;
     const CODE_USE_PROXY = 305;
     const CODE_TEMPORARY_REDIRECT = 307;
+    
+    // Client Error 4xx
     const CODE_BAD_REQUEST = 400;
     const CODE_UNAUTHORIZED = 401;
     const CODE_PAYMENT_REQUIRED = 402;

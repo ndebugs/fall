@@ -8,6 +8,9 @@ namespace ndebugs\fall\annotation;
  */
 final class Roles {
 
-    /** @var string[] */
+    /**
+     * @var string[]
+     * @Required
+     */
     public $values;
 }

@@ -4,7 +4,7 @@ namespace ndebugs\fall\adapter;
 
 use ndebugs\fall\annotation\TypeAdapter;
 
-/** @TypeAdapter("boolean") */
+/** @TypeAdapter({"bool", "boolean"}) */
 class BooleanAdapter extends BasicTypeAdapter {
     
     const TRUE_VALUE = 'true';

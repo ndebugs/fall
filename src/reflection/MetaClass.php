@@ -31,15 +31,27 @@ class MetaClass extends ReflectionClass {
 
 	/**
 	 * @param ApplicationContext $context
+	 * @param string $class [optional]
 	 * @return object[]
 	 */
-    public function getAnnotations(ApplicationContext $context) {
+    public function getAnnotations(ApplicationContext $context, $class = null) {
         if ($this->annotations === null) {
             $reader = $context->getComponent(AnnotationReader::class);
             $this->annotations = $reader->getClassAnnotations($this);
         }
         
-        return $this->annotations;
+        if ($class !== null) {
+            $annotations = [];
+            foreach ($this->annotations as $annotation) {
+                if ($annotation instanceof $class) {
+                    $annotations[] = $annotation;
+                }
+            }
+            
+            return $annotations;
+        } else {
+            return $this->annotations;
+        }
     }
     
 	/**

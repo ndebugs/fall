@@ -28,11 +28,11 @@ class ObjectMapper {
      * @return mixed
      */
     public function getValue(MetaProperty $property, $object) {
-        $name = $property->getName();
         $type = null;
         $value = null;
         
         if (!$property->isPublic()) {
+            $name = $property->getName();
             $methodName = 'get' . ucfirst($name);
             if ($this->metadata->hasMethod($methodName)) {
                 $method = $this->metadata->getMetaMethod($methodName);
@@ -49,8 +49,12 @@ class ObjectMapper {
         
         $defaultType = gettype($value);
         $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type, $defaultType);
-        $valueType = $type != $defaultType ? $type : null;
-        return $adapter ? $adapter->uncast($value, $valueType) : $value;
+        if ($adapter) {
+            $valueType = $type != $defaultType ? $type : null;
+            return $adapter->uncast($value, $valueType);
+        } else {
+            return $value;
+        }
     }
     
     /**
@@ -60,30 +64,35 @@ class ObjectMapper {
      * @return void
      */
     public function setValue(MetaProperty $property, $object, $value) {
-        $name = $property->getName();
         $type = $property->getType($this->context);
         
         $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type, 'mixed');
-        $valueType = $type != gettype($value) ? $type : null;
-        $adaptedValue = $adapter ? $adapter->cast($value, $valueType) : $value;
+        if ($adapter) {
+            $valueType = $type != gettype($value) ? $type : null;
+            $value = $adapter->uncast($value, $valueType);
+        }
         
         if (!$property->isPublic()) {
+            $name = $property->getName();
             $methodName = 'set' . ucfirst($name);
             if ($this->metadata->hasMethod($methodName)) {
                 $method = $this->metadata->getMetaMethod($methodName);
-                $value = $method->invoke($object, $adaptedValue);
+                $method->invoke($object, $value);
             }
         } else {
-            $property->setValue($object, $adaptedValue);
+            $property->setValue($object, $value);
         }
     }
     
     /**
      * @param array $values
+     * @param object $object [optional]
      * @return object
      */
-    public function toObject(array $values) {
-        $object = $this->metadata->newInstanceArgs();
+    public function toObject(array $values, $object = null) {
+        if ($object === null) {
+            $object = $this->metadata->newInstanceArgs();
+        }
         
         $properties = $this->metadata->getMetaProperties();
         foreach ($properties as $property) {

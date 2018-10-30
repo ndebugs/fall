@@ -4,7 +4,7 @@ namespace ndebugs\fall\adapter;
 
 use ndebugs\fall\annotation\TypeAdapter;
 
-/** @TypeAdapter("integer") */
+/** @TypeAdapter({"int", "integer"}) */
 class IntegerAdapter extends BasicTypeAdapter {
     
     /**

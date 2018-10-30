@@ -37,9 +37,8 @@ class MixedAdapter extends BasicTypeAdapter {
      * @return mixed
      */
     public function uncast($value, $type = null) {
-        $defaultType = gettype($value);
         $valueType = is_object($value) ? get_class($value) : null;
-        $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $valueType, $defaultType);
+        $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $valueType, gettype($value));
         
         return $adapter ? $adapter->uncast($value, $valueType) : $value;
     }

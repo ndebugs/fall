@@ -4,7 +4,7 @@ namespace ndebugs\fall\adapter;
 
 use ndebugs\fall\annotation\TypeAdapter;
 
-/** @TypeAdapter("double") */
+/** @TypeAdapter({"float", "double", "real"}) */
 class DoubleAdapter extends BasicTypeAdapter {
     
     /**

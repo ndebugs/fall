@@ -5,6 +5,7 @@ namespace ndebugs\fall\reflection;
 use ReflectionProperty;
 use Doctrine\Common\Annotations\AnnotationReader;
 use ndebugs\fall\context\ApplicationContext;
+use ndebugs\fall\util\Objects;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\ContextFactory;
@@ -48,7 +49,8 @@ class MetaProperty extends ReflectionProperty {
             $tags = $docblock->getTagsByName('var');
             if ($tags) {
                 $type = (string) $tags[0]->getType();
-                $this->type = $type[0] === '\\' ? substr($type, 1) : $type;
+                $this->type = $type[0] === '\\' ?
+                    substr($type, 1) : Objects::normalizeType($type);
             } else {
                 $this->type = '';
             }
@@ -75,14 +77,26 @@ class MetaProperty extends ReflectionProperty {
 
 	/**
 	 * @param ApplicationContext $context
+	 * @param string $class [optional]
 	 * @return object[]
 	 */
-    public function getAnnotations(ApplicationContext $context) {
+    public function getAnnotations(ApplicationContext $context, $class = null) {
         if ($this->annotations === null) {
             $reader = $context->getComponent(AnnotationReader::class);
             $this->annotations = $reader->getPropertyAnnotations($this);
         }
         
-        return $this->annotations;
+        if ($class !== null) {
+            $annotations = [];
+            foreach ($this->annotations as $annotation) {
+                if ($annotation instanceof $class) {
+                    $annotations[] = $annotation;
+                }
+            }
+            
+            return $annotations;
+        } else {
+            return $this->annotations;
+        }
     }
 }

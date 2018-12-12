@@ -3,34 +3,35 @@
 namespace ndebugs\fall\adapter;
 
 use ndebugs\fall\annotation\TypeAdapter;
+use ndebugs\fall\reflection\type\Type;
+use ndebugs\fall\reflection\type\IntegerType;
 
-/** @TypeAdapter({"int", "integer"}) */
-class IntegerAdapter extends BasicTypeAdapter {
+/** @TypeAdapter(IntegerType::NAME) */
+class IntegerAdapter implements BasicTypeAdaptable {
     
     /**
      * @param mixed $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return integer
      */
-    public function cast($value, $type = null) {
+    public function cast($value, Type $type = null) {
         return (integer) $value;
     }
     
     /**
      * @param integer $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return integer
      */
-    public function uncast($value, $type = null) {
+    public function uncast($value, Type $type = null) {
         return (integer) $value;
     }
     
     /**
-     * @param mixed $value
-     * @param string $type [optional]
+     * @param string $value
      * @return integer
      */
-    public function parse($value, $type = null) {
+    public function parse($value) {
         return intval($value);
     }
     

@@ -4,13 +4,13 @@ namespace ndebugs\fall\filter;
 
 use Exception;
 use ndebugs\fall\annotation\Autowired;
-use ndebugs\fall\annotation\TypeFilter;
+use ndebugs\fall\annotation\TypeAdapter;
 use ndebugs\fall\http\HTTPException;
 use ndebugs\fall\http\HTTPResponse;
 use ndebugs\fall\web\HTTPInternalServerErrorException;
 use ndebugs\fall\web\TemplateManager;
 
-/** @TypeFilter(Exception::class) */
+/** @TypeAdapter(Exception::class) */
 class ExceptionResponseFilter implements ResponseFilterable {
     
     /**

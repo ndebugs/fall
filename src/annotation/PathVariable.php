@@ -2,9 +2,10 @@
 
 namespace ndebugs\fall\annotation;
 
-use ndebugs\fall\adapter\DataTypeAdapter;
+use ndebugs\fall\adapter\BasicTypeAdaptable;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\context\RequestContext;
+use ndebugs\fall\reflection\TypeResolver;
 
 /**
  * @Annotation
@@ -38,8 +39,9 @@ final class PathVariable extends RequestAttribute {
         $value = $requestContext->getPathVariable($this->name);
         
         if ($this->type) {
-            $adapter = $context->getTypeAdapter(DataTypeAdapter::class, $this->type);
-            return $adapter ? $adapter->parse($value, $this->type) : null;
+            $type = TypeResolver::fromString($this->type);
+            $adapter = $context->getTypeAdapter(BasicTypeAdaptable::class, $type);
+            return $adapter ? $adapter->parse($value) : null;
         } else {
             return $value;
         }

@@ -2,18 +2,17 @@
 
 namespace ndebugs\fall\adapter;
 
-use ndebugs\fall\annotation\TypeAdapter;
+use ndebugs\fall\annotation\StaticTypeAdapter;
 use ndebugs\fall\net\QueryString;
 
-/** @TypeAdapter("application/x-www-form-urlencoded") */
-class QueryStringAdapter extends DocumentTypeAdapter {
+/** @StaticTypeAdapter("application/x-www-form-urlencoded") */
+class QueryStringAdapter implements DocumentTypeAdaptable {
     
     /**
      * @param string $value
-     * @param string $type [optional]
      * @return string[]
      */
-    public function parse($value, $type = null) {
+    public function parse($value) {
         $query = QueryString::parse($value);
         return $query->getValues();
     }

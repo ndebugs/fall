@@ -2,9 +2,10 @@
 
 namespace ndebugs\fall\annotation;
 
-use ndebugs\fall\adapter\DataTypeAdapter;
+use ndebugs\fall\adapter\ObjectTypeAdaptable;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\context\RequestContext;
+use ndebugs\fall\reflection\TypeResolver;
 
 /**
  * @Annotation
@@ -35,8 +36,9 @@ final class RequestBody extends RequestAttribute {
         $value = $requestContext->getContent($context);
         
         if ($this->type) {
-            $adapter = $context->getTypeAdapter(DataTypeAdapter::class, $this->type);
-            return $adapter ? $adapter->parse($value, $this->type) : null;
+            $type = TypeResolver::fromString($this->type);
+            $adapter = $context->getTypeAdapter(ObjectTypeAdaptable::class, $type);
+            return $adapter ? $adapter->cast($value, $type) : null;
         } else {
             return $value;
         }

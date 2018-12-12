@@ -2,12 +2,12 @@
 
 namespace ndebugs\fall\routing;
 
-use ReflectionMethod;
 use ndebugs\fall\annotation\RequestAttribute;
 use ndebugs\fall\annotation\RequestMap;
 use ndebugs\fall\annotation\ResponseAttribute;
 use ndebugs\fall\annotation\Roles;
 use ndebugs\fall\net\Path;
+use ndebugs\fall\reflection\XMethod;
 use ndebugs\fall\routing\Route;
 use ndebugs\fall\routing\RouteGroup;
 
@@ -16,7 +16,7 @@ class RouteBuilder {
     /** @var RouteGroup */
     private $group;
     
-    /** @var ReflectionMethod */
+    /** @var XMethod */
     private $action;
     
     /** @var Path */
@@ -48,10 +48,10 @@ class RouteBuilder {
     }
 
 	/**
-	 * @param ReflectionMethod $action
+	 * @param XMethod $action
 	 * @return RouteBuilder
 	 */
-    public function setAction(ReflectionMethod $action) {
+    public function setAction(XMethod $action) {
         $this->action = $action;
         
         return $this;

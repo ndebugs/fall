@@ -2,22 +2,21 @@
 
 namespace ndebugs\fall\adapter;
 
-use ndebugs\fall\annotation\TypeAdapter;
+use ndebugs\fall\annotation\StaticTypeAdapter;
 
 /**
- * @TypeAdapter({
+ * @StaticTypeAdapter({
  *  "application/json",
  *  "application/javascript"
  * })
  */
-class JSONAdapter extends DocumentTypeAdapter {
+class JSONAdapter implements DocumentTypeAdaptable {
     
     /**
      * @param string $value
-     * @param string $type [optional]
      * @return mixed
      */
-    public function parse($value, $type = null) {
+    public function parse($value) {
         return json_decode($value, true);
     }
     

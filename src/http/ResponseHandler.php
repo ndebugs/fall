@@ -6,6 +6,7 @@ use ndebugs\fall\annotation\ResponseAttribute;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\filter\ResponseFilterable;
 use ndebugs\fall\http\HTTPResponse;
+use ndebugs\fall\reflection\TypeResolver;
 
 class ResponseHandler {
     
@@ -30,7 +31,8 @@ class ResponseHandler {
      */
     private function processFilter($value) {
         do {
-            $adapter = $this->context->getTypeFilter(ResponseFilterable::class, $value);
+            $type = TypeResolver::fromValue($value);
+            $adapter = $this->context->getTypeAdapter(ResponseFilterable::class, $type);
             $value = $adapter ? $adapter->filter($this->response, $value) : null;
         } while ($value);
     }

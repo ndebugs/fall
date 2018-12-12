@@ -5,9 +5,12 @@ namespace ndebugs\fall\adapter;
 use ndebugs\fall\annotation\Autowired;
 use ndebugs\fall\annotation\TypeAdapter;
 use ndebugs\fall\context\ApplicationContext;
+use ndebugs\fall\reflection\TypeResolver;
+use ndebugs\fall\reflection\type\Type;
+use ndebugs\fall\reflection\type\ArrayType;
 
-/** @TypeAdapter("array") */
-class ArrayAdapter extends BasicTypeAdapter {
+/** @TypeAdapter(ArrayType::NAME) */
+class ArrayAdapter implements DataTypeAdaptable {
     
     /**
      * @var ApplicationContext
@@ -16,87 +19,49 @@ class ArrayAdapter extends BasicTypeAdapter {
     public $context;
     
     /**
-     * @param string $type
-     * @return DataTypeAdapter
-     */
-    public function getAdapter($type) {
-        return class_exists($type) ?
-            $this->context->getTypeAdapter(ObjectTypeAdapter::class, $type, 'object') :
-            $this->context->getTypeAdapter(BasicTypeAdapter::class, $type);
-    }
-    
-    /**
      * @param array $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return array
      */
-    public function cast($value, $type = null) {
-        if ($value !== null) {
-            $adapter = null;
-            if ($type !== null) {
-                $type = preg_replace('/\[\]$/', '', $type);
-                $adapter = $this->getAdapter($type);
-            }
-
-            $values = [];
-            foreach ($value as $k => $v) {
-                if (!$adapter) {
-                    $valueType = is_object($v) ? get_class($v) : null;
-                    $valueAdapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $valueType, gettype($v));
-                    $values[$k] = $valueAdapter->cast($v, $valueType);
-                } else {
-                    $values[$k] = $adapter->cast($v, $type);
+    public function cast($value, Type $type = null) {
+        if ($type instanceof ArrayType && $type->getType()) {
+            $adapter = $this->context->getTypeAdapter(DataTypeAdaptable::class, $type->getType());
+            if ($adapter) {
+                $values = [];
+                foreach ($value as $k => $v) {
+                    $values[$k] = $adapter->cast($v, $type->getType());
                 }
+                return $values;
             }
-            return $values;
-        } else {
-            return null;
         }
+        return is_array($value) ? $value : null;
     }
     
     /**
      * @param array $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return array
      */
-    public function uncast($value, $type = null) {
+    public function uncast($value, Type $type = null) {
         if ($value !== null) {
             $adapter = null;
-            if ($type !== null) {
-                $type = preg_replace('/\[\]$/', '', $type);
-                $adapter = $this->getAdapter($type);
+            if ($type instanceof ArrayType && $type->getType()) {
+                $adapter = $this->context->getTypeAdapter(DataTypeAdaptable::class, $type->getType());
             }
 
             $values = [];
             foreach ($value as $k => $v) {
                 if (!$adapter) {
-                    $valueType = is_object($v) ? get_class($v) : null;
-                    $valueAdapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $valueType, gettype($v));
+                    $valueType = TypeResolver::fromValue($v);
+                    $valueAdapter = $this->context->getTypeAdapter(DataTypeAdaptable::class, $valueType);
                     $values[$k] = $valueAdapter->uncast($v, $valueType);
                 } else {
-                    $values[$k] = $adapter->uncast($v, $type);
+                    $values[$k] = $adapter->uncast($v, $type->getType());
                 }
             }
             return $values;
         } else {
             return null;
         }
-    }
-    
-    /**
-     * @param array $value
-     * @param string $type [optional]
-     * @return array
-     */
-    public function parse($value, $type = null) {
-        return null;
-    }
-    
-    /**
-     * @param array $value
-     * @return string
-     */
-    public function toString($value) {
-        return null;
     }
 }

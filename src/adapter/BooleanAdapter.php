@@ -3,37 +3,38 @@
 namespace ndebugs\fall\adapter;
 
 use ndebugs\fall\annotation\TypeAdapter;
+use ndebugs\fall\reflection\type\Type;
+use ndebugs\fall\reflection\type\BooleanType;
 
-/** @TypeAdapter({"bool", "boolean"}) */
-class BooleanAdapter extends BasicTypeAdapter {
+/** @TypeAdapter(BooleanType::NAME) */
+class BooleanAdapter implements BasicTypeAdaptable {
     
     const TRUE_VALUE = 'true';
     const FALSE_VALUE = 'false';
     
     /**
      * @param mixed $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return boolean
      */
-    public function cast($value, $type = null) {
+    public function cast($value, Type $type = null) {
         return (boolean) $value;
     }
     
     /**
      * @param boolean $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return boolean
      */
-    public function uncast($value, $type = null) {
+    public function uncast($value, Type $type = null) {
         return (boolean) $value;
     }
     
     /**
-     * @param mixed $value
-     * @param string $type [optional]
+     * @param string $value
      * @return boolean
      */
-    public function parse($value, $type = null) {
+    public function parse($value) {
         return $value === BooleanAdapter::TRUE_VALUE;
     }
     

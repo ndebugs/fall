@@ -2,15 +2,16 @@
 
 namespace ndebugs\fall\filter;
 
-use ndebugs\fall\adapter\DataTypeAdapter;
-use ndebugs\fall\adapter\DocumentTypeAdapter;
+use ndebugs\fall\adapter\DataTypeAdaptable;
+use ndebugs\fall\adapter\DocumentTypeAdaptable;
 use ndebugs\fall\annotation\Autowired;
-use ndebugs\fall\annotation\TypeFilter;
+use ndebugs\fall\annotation\TypeAdapter;
 use ndebugs\fall\context\ApplicationContext;
 use ndebugs\fall\http\HTTPResponse;
+use ndebugs\fall\reflection\TypeResolver;
 use ndebugs\fall\web\TypedModel;
 
-/** @TypeFilter(TypedModel::class) */
+/** @TypeAdapter(TypedModel::class) */
 class TypedModelResponseFilter implements ResponseFilterable {
     
     /**
@@ -25,11 +26,11 @@ class TypedModelResponseFilter implements ResponseFilterable {
      */
     private function toString(TypedModel $model) {
         $value = $model->getValue();
-        $type = is_object($value) ? get_class($value) : null;
-        $dataAdapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type, gettype($value));
+        $type = TypeResolver::fromValue($value);
+        $dataAdapter = $this->context->getTypeAdapter(DataTypeAdaptable::class, $type);
         $adaptedValue = $dataAdapter ? $dataAdapter->uncast($value, $type) : $value;
         
-        $documentAdapter = $this->context->getTypeAdapter(DocumentTypeAdapter::class, $model->getType());
+        $documentAdapter = $this->context->getStaticTypeAdapter(DocumentTypeAdaptable::class, $model->getType());
         return $documentAdapter ? $documentAdapter->toString($adaptedValue) : null;
     }
     

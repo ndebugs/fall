@@ -2,11 +2,11 @@
 
 namespace ndebugs\fall\filter;
 
-use ndebugs\fall\annotation\TypeFilter;
+use ndebugs\fall\annotation\TypeAdapter;
 use ndebugs\fall\http\HTTPResponse;
 use ndebugs\fall\web\Template;
 
-/** @TypeFilter("string") */
+/** @TypeAdapter("string") */
 class StringResponseFilter implements ResponseFilterable {
     
     /**

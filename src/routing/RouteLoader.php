@@ -7,7 +7,7 @@ use ndebugs\fall\annotation\RequestMap;
 use ndebugs\fall\annotation\ResponseAttribute;
 use ndebugs\fall\annotation\Roles;
 use ndebugs\fall\context\ApplicationContext;
-use ndebugs\fall\reflection\MetaMethod;
+use ndebugs\fall\reflection\XMethod;
 use ndebugs\fall\routing\RouteGroup;
 
 class RouteLoader {
@@ -28,10 +28,10 @@ class RouteLoader {
     }
 
 	/**
-	 * @param MetaMethod $method
+	 * @param XMethod $method
 	 * @return Route
 	 */
-    public function load(MetaMethod $method) {
+    public function load(XMethod $method) {
         $requestMap = $method->getAnnotation($this->context, RequestMap::class);
         if ($requestMap) {
             $builder = new RouteBuilder();
@@ -59,10 +59,10 @@ class RouteLoader {
     
 	/** @return Route[] */
     public function loadAll() {
-        $reflection = $this->group->getMetadata();
+        $class = $this->group->getController();
         
         $routes = [];
-        foreach ($reflection->getMetaMethods() as $method) {
+        foreach ($class->getMethods() as $method) {
             $route = $this->load($method);
             if ($route) {
                 $routes[] = $route;

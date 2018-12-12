@@ -6,10 +6,9 @@ interface TypeParsable {
     
     /**
      * @param string $value
-     * @param string $type [optional]
      * @return mixed
      */
-    public function parse($value, $type = null);
+    public function parse($value);
     
     /**
      * @param mixed $value

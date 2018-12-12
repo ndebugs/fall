@@ -3,34 +3,35 @@
 namespace ndebugs\fall\adapter;
 
 use ndebugs\fall\annotation\TypeAdapter;
+use ndebugs\fall\reflection\type\Type;
+use ndebugs\fall\reflection\type\StringType;
 
-/** @TypeAdapter("string") */
-class StringAdapter extends BasicTypeAdapter {
+/** @TypeAdapter(StringType::NAME) */
+class StringAdapter implements BasicTypeAdaptable {
     
     /**
      * @param mixed $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return string
      */
-    public function cast($value, $type = null) {
+    public function cast($value, Type $type = null) {
         return $value !== null ? (string) $value : null;
     }
     
     /**
      * @param string $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return string
      */
-    public function uncast($value, $type = null) {
+    public function uncast($value, Type $type = null) {
         return $value !== null ? (string) $value : null;
     }
     
     /**
-     * @param mixed $value
-     * @param string $type [optional]
+     * @param string $value
      * @return string
      */
-    public function parse($value, $type = null) {
+    public function parse($value) {
         return $value !== null ? (string) $value : null;
     }
     

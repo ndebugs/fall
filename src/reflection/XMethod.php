@@ -5,17 +5,18 @@ namespace ndebugs\fall\reflection;
 use ReflectionMethod;
 use Doctrine\Common\Annotations\AnnotationReader;
 use ndebugs\fall\context\ApplicationContext;
-use ndebugs\fall\util\Objects;
+use ndebugs\fall\reflection\TypeResolver;
+use ndebugs\fall\reflection\type\Type;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\ContextFactory;
 
-class MetaMethod extends ReflectionMethod {
+class XMethod extends ReflectionMethod {
     
     /** @var DocBlock */
     private $docBlock;
     
-    /** @var string */
+    /** @var Type */
     private $type;
     
     /** @var object[] */
@@ -26,10 +27,9 @@ class MetaMethod extends ReflectionMethod {
 	 * @return DocBlock
 	 */
     public function getDocBlock(ApplicationContext $context) {
-        if (!$this->docBlock) {
+        $docComment = $this->getDocComment();
+        if (!$this->docBlock && $docComment) {
             $factory = $context->getComponent(DocBlockFactory::class);
-            $docComment = $this->getDocComment();
-            
             $contextFactory = $context->getComponent(ContextFactory::class);
             $context = $contextFactory->createFromReflector($this);
                 
@@ -41,19 +41,13 @@ class MetaMethod extends ReflectionMethod {
     
 	/**
 	 * @param ApplicationContext $context
-	 * @return string
+	 * @return Type
 	 */
     public function getType(ApplicationContext $context) {
         if ($this->type === null) {
             $docblock = $this->getDocBlock($context);
-            $tags = $docblock->getTagsByName('return');
-            if ($tags) {
-                $type = (string) $tags[0]->getType();
-                $this->type = $type[0] === '\\' ?
-                    substr($type, 1) : Objects::normalizeType($type);
-            } else {
-                $this->type = '';
-            }
+            $tags = $docblock ? $docblock->getTagsByName('return') : null;
+            $this->type = TypeResolver::fromType($tags ? $tags[0]->getType() : null);
         }
         
         return $this->type;

@@ -3,12 +3,10 @@
 namespace ndebugs\fall\reflection;
 
 use ReflectionClass;
-use ReflectionMethod;
-use ReflectionProperty;
 use Doctrine\Common\Annotations\AnnotationReader;
 use ndebugs\fall\context\ApplicationContext;
 
-class MetaClass extends ReflectionClass {
+class XClass extends ReflectionClass {
     
     /** @var object[] */
     private $annotations;
@@ -55,63 +53,48 @@ class MetaClass extends ReflectionClass {
     }
     
 	/**
-	 * @param integer $filter [optional]
-	 * @return ReflectionProperty[]
-	 */
-    public function getProperties($filter = null) {
-        return $filter !== null ? parent::getProperties($filter) : parent::getProperties();
-    }
-    
-	/**
 	 * @param string $name
-	 * @return MetaProperty
+	 * @return XProperty
 	 */
-    public function getMetaProperty($name) {
-        $reflection = $this->getProperty($name);
-        return new MetaProperty($this->getName(), $reflection->getName());
+    public function getProperty($name) {
+        $reflection = parent::getProperty($name);
+        return new XProperty($this->getName(), $reflection->getName());
     }
 
 	/**
 	 * @param integer $filter [optional]
-	 * @return MetaProperty[]
+	 * @return XProperty[]
 	 */
-    public function getMetaProperties($filter = null) {
+    public function getProperties($filter = null) {
         $properties = [];
         $reflections = $filter !== null ?
-                $this->getProperties($filter) : $this->getProperties();
+                parent::getProperties($filter) : parent::getProperties();
         foreach ($reflections as $reflection) {
-            $properties[] = new MetaProperty($this->getName(), $reflection->getName());
+            $properties[] = new XProperty($this->getName(), $reflection->getName());
         }
         
         return $properties;
     }
 
 	/**
-	 * @param integer $filter [optional]
-	 * @return ReflectionMethod[]
-	 */
-    public function getMethods($filter = null) {
-        return $filter !== null ? parent::getMethods($filter) : parent::getMethods();
-    }
-    
-	/**
 	 * @param string $name
-	 * @return MetaMethod
+	 * @return XMethod
 	 */
-    public function getMetaMethod($name) {
-        $reflection = $this->getMethod($name);
-        return new MetaMethod($this->getName(), $reflection->getName());
+    public function getMethod($name) {
+        $reflection = parent::getMethod($name);
+        return new XMethod($this->getName(), $reflection->getName());
     }
 
 	/**
 	 * @param integer $filter [optional]
-	 * @return MetaMethod[]
+	 * @return XMethod[]
 	 */
-    public function getMetaMethods($filter = null) {
+    public function getMethods($filter = null) {
         $methods = [];
-        $reflections = $this->getMethods($filter);
+        $reflections = $filter !== null ?
+                parent::getMethods($filter) : parent::getMethods();
         foreach ($reflections as $reflection) {
-            $methods[] = new MetaMethod($this->getName(), $reflection->getName());
+            $methods[] = new XMethod($this->getName(), $reflection->getName());
         }
         
         return $methods;

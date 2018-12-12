@@ -3,12 +3,12 @@
 namespace ndebugs\fall\filter;
 
 use ndebugs\fall\annotation\Autowired;
-use ndebugs\fall\annotation\TypeFilter;
+use ndebugs\fall\annotation\TypeAdapter;
 use ndebugs\fall\http\HTTPResponse;
 use ndebugs\fall\web\Template;
 use ndebugs\fall\web\TemplateManager;
 
-/** @TypeFilter(Template::class) */
+/** @TypeAdapter(Template::class) */
 class TemplateResponseFilter implements ResponseFilterable {
     
     /**

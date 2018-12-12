@@ -2,106 +2,95 @@
 
 namespace ndebugs\fall\reflection;
 
-use ndebugs\fall\adapter\DataTypeAdapter;
+use ndebugs\fall\adapter\DataTypeAdaptable;
 use ndebugs\fall\context\ApplicationContext;
+use ndebugs\fall\validation\ObjectValidator;
+use ndebugs\fall\validation\ValidationError;
+use ndebugs\fall\validation\ValidationException;
 
 class ObjectMapper {
     
     /** @var ApplicationContext */
     private $context;
     
-    /** @var MetaClass */
-    private $metadata;
+    /** @var XClass */
+    private $class;
+    
+    /** @var ObjectValidator */
+    private $validator;
     
     /**
      * @param ApplicationContext $context
-     * @param MetaClass $metadata
+     * @param XClass $class
      */
-    public function __construct(ApplicationContext $context, MetaClass $metadata) {
+    public function __construct(ApplicationContext $context, XClass $class) {
         $this->context = $context;
-        $this->metadata = $metadata;
+        $this->class = $class;
+        
+        $this->validator = new ObjectValidator($context);
     }
 
     /**
-     * @param MetaProperty $property
-     * @param object $object
+     * @param XProperty $property
+     * @param ObjectAccessor $object
      * @return mixed
      */
-    public function getValue(MetaProperty $property, $object) {
-        $type = null;
-        $value = null;
+    public function getValue(XProperty $property, ObjectAccessor $object) {
+        $type = $property->getType($this->context);
+        $adapter = $this->context->getTypeAdapter(DataTypeAdaptable::class, $type);
         
-        if (!$property->isPublic()) {
-            $name = $property->getName();
-            $methodName = 'get' . ucfirst($name);
-            if ($this->metadata->hasMethod($methodName)) {
-                $method = $this->metadata->getMetaMethod($methodName);
-                $type = $method->getType($this->context);
-                $value = $method->invoke($object);
-            }
-        } else {
-            $value = $property->getValue($object);
-        }
-        
-        if (!$type) {
-            $type = $property->getType($this->context);
-        }
-        
-        $defaultType = gettype($value);
-        $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type, $defaultType);
-        if ($adapter) {
-            $valueType = $type != $defaultType ? $type : null;
-            return $adapter->uncast($value, $valueType);
-        } else {
-            return $value;
-        }
+        $value = $object->get($property);
+        return $adapter ? $adapter->uncast($value, $type) : $value;
     }
     
     /**
-     * @param MetaProperty $property
-     * @param object $object
+     * @param XProperty $property
+     * @param ObjectAccessor $object
      * @param mixed $value
-     * @return void
+     * @return ValidationError
      */
-    public function setValue(MetaProperty $property, $object, $value) {
+    public function setValue(XProperty $property, ObjectAccessor $object, $value) {
         $type = $property->getType($this->context);
-        
-        $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $type, 'mixed');
+        $adapter = $this->context->getTypeAdapter(DataTypeAdaptable::class, $type);
         if ($adapter) {
-            $valueType = $type != gettype($value) ? $type : null;
-            $value = $adapter->uncast($value, $valueType);
+            $value = $adapter->cast($value, $type);
         }
         
-        if (!$property->isPublic()) {
-            $name = $property->getName();
-            $methodName = 'set' . ucfirst($name);
-            if ($this->metadata->hasMethod($methodName)) {
-                $method = $this->metadata->getMetaMethod($methodName);
-                $method->invoke($object, $value);
-            }
-        } else {
-            $property->setValue($object, $value);
+        $error = $this->validator->validateProperty($property, $value);
+        if (!$error) {
+            $object->set($property, $value);
         }
+        return $error;
     }
     
     /**
      * @param array $values
      * @param object $object [optional]
      * @return object
+     * 
+     * @throws ValidationException
      */
     public function toObject(array $values, $object = null) {
         if ($object === null) {
-            $object = $this->metadata->newInstanceArgs();
+            $object = $this->class->newInstanceArgs();
         }
+        $objectAccessor = new ObjectAccessor($object, $this->class);
         
-        $properties = $this->metadata->getMetaProperties();
+        $errors = [];
+        $properties = $this->class->getProperties();
         foreach ($properties as $property) {
             $name = $property->getName();
-            if (array_key_exists($name, $values)) {
-                $this->setValue($property, $object, $values[$name]);
+            $error = array_key_exists($name, $values) ?
+                $this->setValue($property, $objectAccessor, $values[$name]) :
+                $this->validator->validateProperty($property, null);
+            if ($error) {
+                $errors[] = $error;
             }
         }
         
+        if ($errors) {
+            throw ValidationException::forErrors($errors);
+        }
         return $object;
     }
 
@@ -110,11 +99,13 @@ class ObjectMapper {
      * @return array
      */
     public function toArray($object) {
+        $objectAccessor = new ObjectAccessor($object, $this->class);
+        
         $values = [];
-        $properties = $this->metadata->getMetaProperties();
+        $properties = $this->class->getProperties();
         foreach ($properties as $property) {
             $name = $property->getName();
-            $values[$name] = $this->getValue($property, $object);
+            $values[$name] = $this->getValue($property, $objectAccessor);
         }
         
         return $values;

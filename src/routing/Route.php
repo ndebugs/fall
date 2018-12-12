@@ -2,17 +2,17 @@
 
 namespace ndebugs\fall\routing;
 
-use ReflectionMethod;
 use ndebugs\fall\annotation\RequestAttribute;
 use ndebugs\fall\annotation\ResponseAttribute;
 use ndebugs\fall\net\Path;
+use ndebugs\fall\reflection\XMethod;
 
 class Route {
     
     /** @var RouteGroup */
     private $group;
     
-    /** @var ReflectionMethod */
+    /** @var XMethod */
     private $action;
     
     /** @var Path */
@@ -46,16 +46,16 @@ class Route {
         $this->group = $group;
     }
 
-    /** @return ReflectionMethod */
+    /** @return XMethod */
     public function getAction() {
         return $this->action;
     }
 
 	/**
-	 * @param ReflectionMethod $action
+	 * @param XMethod $action
 	 * @return void
 	 */
-    public function setAction(ReflectionMethod $action) {
+    public function setAction(XMethod $action) {
         $this->action = $action;
     }
 

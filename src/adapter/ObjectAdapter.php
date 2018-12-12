@@ -5,11 +5,13 @@ namespace ndebugs\fall\adapter;
 use ndebugs\fall\annotation\Autowired;
 use ndebugs\fall\annotation\TypeAdapter;
 use ndebugs\fall\context\ApplicationContext;
-use ndebugs\fall\reflection\MetaClass;
+use ndebugs\fall\reflection\XClass;
 use ndebugs\fall\reflection\ObjectMapper;
+use ndebugs\fall\reflection\type\Type;
+use ndebugs\fall\reflection\type\ObjectType;
 
-/** @TypeAdapter("object") */
-class ObjectAdapter extends ObjectTypeAdapter {
+/** @TypeAdapter(ObjectType::NAME) */
+class ObjectAdapter implements ObjectTypeAdaptable {
     
     /**
      * @var ApplicationContext
@@ -19,13 +21,12 @@ class ObjectAdapter extends ObjectTypeAdapter {
     
     /**
      * @param array $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return object
      */
-    public function cast($value, $type = null) {
-        if (class_exists($type)) {
-            $metadata = new MetaClass($type);
-            $mapper = new ObjectMapper($this->context, $metadata);
+    public function cast($value, Type $type = null) {
+        if ($type instanceof ObjectType && $type->getType()) {
+            $mapper = new ObjectMapper($this->context, $type->getType());
             return $mapper->toObject($value);
         } else {
             return null;
@@ -34,13 +35,14 @@ class ObjectAdapter extends ObjectTypeAdapter {
     
     /**
      * @param object $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return array
      */
-    public function uncast($value, $type = null) {
+    public function uncast($value, Type $type = null) {
         if (is_object($value)) {
-            $metadata = new MetaClass($value);
-            $mapper = new ObjectMapper($this->context, $metadata);
+            $class = $type instanceof ObjectType && $type->getType() ?
+                    $type->getType() : new XClass($value);
+            $mapper = new ObjectMapper($this->context, $class);
             return $mapper->toArray($value);
         } else {
             return null;

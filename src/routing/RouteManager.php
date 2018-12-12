@@ -52,7 +52,7 @@ class RouteManager {
             $type = $context->getType($this->context);
             
             $routeGroup = new RouteGroup();
-            $routeGroup->setMetadata($context->getMetadata());
+            $routeGroup->setController($context->getReflection());
             $routeGroup->setPath(Path::parseURL($type->path));
 
             $this->routeGroups[] = $routeGroup;
@@ -64,7 +64,7 @@ class RouteManager {
      * @return Route[]
      */
     public function getRoutes(RouteGroup $routeGroup) {
-        $class = $routeGroup->getMetadata()->getName();
+        $class = $routeGroup->getController()->getName();
         if (!isset($this->routes[$class])) {
             $loader = new RouteLoader($this->context, $routeGroup);
             $routes = $loader->loadAll();
@@ -141,7 +141,7 @@ class RouteManager {
 
                 $result = $requestHandler->process();
             } else {
-                $result = new HTTPNotFoundException('The requested URL ' . $request->getURL() . ' was not found on this server.');
+                $result = HTTPNotFoundException::forURL($request->getURL());
             }
         } catch (Exception $e) {
             $result = $e;

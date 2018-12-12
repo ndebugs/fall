@@ -5,9 +5,12 @@ namespace ndebugs\fall\adapter;
 use ndebugs\fall\annotation\Autowired;
 use ndebugs\fall\annotation\TypeAdapter;
 use ndebugs\fall\context\ApplicationContext;
+use ndebugs\fall\reflection\TypeResolver;
+use ndebugs\fall\reflection\type\Type;
+use ndebugs\fall\reflection\type\AnyType;
 
-/** @TypeAdapter("mixed") */
-class MixedAdapter extends BasicTypeAdapter {
+/** @TypeAdapter(AnyType::NAME) */
+class MixedAdapter implements BasicTypeAdaptable {
     
     /**
      * @var ApplicationContext
@@ -17,14 +20,12 @@ class MixedAdapter extends BasicTypeAdapter {
     
     /**
      * @param mixed $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return mixed
      */
-    public function cast($value, $type = null) {
-        if ($type !== null) {
-            $adapter = class_exists($type) ?
-                $this->context->getTypeAdapter(ObjectTypeAdapter::class, $type, 'object') :
-                $this->context->getTypeAdapter(BasicTypeAdapter::class, $type);
+    public function cast($value, Type $type = null) {
+        if ($type && !$type instanceof AnyType) {
+            $adapter = $this->context->getTypeAdapter(DataTypeAdaptable::class, $type);
             return $adapter ? $adapter->cast($value, $type) : $value;
         } else {
             return $value;
@@ -33,28 +34,22 @@ class MixedAdapter extends BasicTypeAdapter {
     
     /**
      * @param mixed $value
-     * @param string $type [optional]
+     * @param Type $type [optional]
      * @return mixed
      */
-    public function uncast($value, $type = null) {
-        $valueType = is_object($value) ? get_class($value) : null;
-        $adapter = $this->context->getTypeAdapter(DataTypeAdapter::class, $valueType, gettype($value));
-        
-        return $adapter ? $adapter->uncast($value, $valueType) : $value;
+    public function uncast($value, Type $type = null) {
+        $resolvedType = $type && !$type instanceof AnyType ?
+                $type : TypeResolver::fromValue($value);
+        $adapter = $this->context->getTypeAdapter(DataTypeAdaptable::class, $resolvedType);
+        return $adapter ? $adapter->uncast($value, $resolvedType) : $value;
     }
     
     /**
-     * @param mixed $value
-     * @param string $type [optional]
-     * @return mixed
+     * @param string $value
+     * @return string
      */
-    public function parse($value, $type = null) {
-        if ($type !== null) {
-            $adapter = $this->context->getTypeAdapter(BasicTypeAdapter::class, $type);
-            return $adapter ? $adapter->parse($value, $type) : $value;
-        } else {
-            return $value;
-        }
+    public function parse($value) {
+        return $value;
     }
     
     /**
@@ -62,9 +57,8 @@ class MixedAdapter extends BasicTypeAdapter {
      * @return string
      */
     public function toString($value) {
-        $type = gettype($value);
-        $adapter = $this->context->getTypeAdapter(BasicTypeAdapter::class, $type);
-        $parsedValue = $adapter ? $adapter->parse($value, $type) : $value;
-        return $parsedValue !== null ? (string) $parsedValue : null;
+        $type = TypeResolver::fromValue($value);
+        $adapter = $this->context->getTypeAdapter(BasicTypeAdaptable::class, $type);
+        return $adapter ? $adapter->toString($value) : (string) $value;
     }
 }

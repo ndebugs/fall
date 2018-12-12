@@ -6,9 +6,10 @@ use Composer\Autoload\ClassLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use ndebugs\fall\annotation\Component;
+use ndebugs\fall\annotation\StaticTypeAdapter;
 use ndebugs\fall\annotation\TypeAdapter;
-use ndebugs\fall\annotation\TypeFilter;
-use ndebugs\fall\reflection\MetaClass;
+use ndebugs\fall\reflection\XClass;
+use ndebugs\fall\reflection\type\Type;
 use ndebugs\fall\util\Strings;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\ContextFactory;
@@ -40,10 +41,10 @@ class ApplicationContext {
         $this->setComponent(DocBlockFactory::createInstance());
         $this->setComponent(new ContextFactory());
         
-        $classes = array_keys($classLoader->getClassMap());
+        $classPaths = array_keys($classLoader->getClassMap());
         $basePackages = $this->properties['scan_packages'];
-        foreach ($classes as $class) {
-            $this->scanPackages($basePackages, $class);
+        foreach ($classPaths as $classPath) {
+            $this->scanPackages($basePackages, $classPath);
         }
     }
     
@@ -64,15 +65,15 @@ class ApplicationContext {
     
     /**
      * @param string $basePackage
-     * @param string $class
+     * @param string $classPath
      * @return ComponentContext
      */
-    private function scanPackage($basePackage, $class) {
-        if (Strings::startsWith($class, $basePackage)) {
-            $reflection = new MetaClass($class);
-            $type = $reflection->getAnnotation($this, Component::class);
+    private function scanPackage($basePackage, $classPath) {
+        if (Strings::startsWith($classPath, $basePackage)) {
+            $class = new XClass($classPath);
+            $type = $class->getAnnotation($this, Component::class);
             if ($type) {
-                return $this->componentContexts[$class] = new ComponentContext($reflection);
+                return $this->componentContexts[$classPath] = new ComponentContext($class);
             }
         }
         return null;
@@ -80,12 +81,12 @@ class ApplicationContext {
     
     /**
      * @param string[] $basePackages
-     * @param string $class
+     * @param string $classPath
      * @return ComponentContext
      */
-    private function scanPackages($basePackages, $class) {
+    private function scanPackages($basePackages, $classPath) {
         foreach ($basePackages as $basePackage) {
-            $context = $this->scanPackage($basePackage, $class);
+            $context = $this->scanPackage($basePackage, $classPath);
             if ($context) {
                 return $context;
             }
@@ -101,12 +102,12 @@ class ApplicationContext {
     }
     
     /**
-     * @param string $class
+     * @param string $classPath
      * @return object
      */
-    public function getComponent($class) {
-        if (isset($this->componentContexts[$class])) {
-            $context = $this->componentContexts[$class];
+    public function getComponent($classPath) {
+        if (isset($this->componentContexts[$classPath])) {
+            $context = $this->componentContexts[$classPath];
             return $context->getValue($this);
         } else {
             return null;
@@ -118,7 +119,7 @@ class ApplicationContext {
      * @return void
      */
     public function setComponent($object) {
-        $context = new ComponentContext(new MetaClass($object), $object);
+        $context = new ComponentContext(new XClass($object), $object);
         $this->componentContexts[get_class($object)] = $context;
     }
     
@@ -138,39 +139,43 @@ class ApplicationContext {
     }
     
     /**
-     * @param string $class
-     * @param string $type
-     * @param string $defaultType [optional]
+     * @param string $classPath
+     * @param Type $type
      * @return object
      */
-    public function getTypeAdapter($class, $type, $defaultType = null) {
-        $defaultAdapter = null;
+    public function getTypeAdapter($classPath, Type $type) {
+        $currentType = null;
+        $currentAdapter = null;
         foreach ($this->componentContexts as $context) {
             $contextType = $context->getType($this);
-            $metadata = $context->getMetadata();
-            if ($metadata->isSubclassOf($class) && $contextType instanceof TypeAdapter) {
-                if ($contextType->hasType($type)) {
-                    return $context->getValue($this);
-                } else if ($defaultType && $contextType->hasType($defaultType)) {
-                    $defaultAdapter = $context->getValue($this);
-                }
+            $contextClass = $context->getReflection();
+            if (!$contextClass->isSubclassOf($classPath) || !$contextType instanceof TypeAdapter) {
+                continue;
+            }
+            
+            $matchType = $contextType->matches($type, $currentType);
+            if ($matchType == $type) {
+                return $context->getValue($this);
+            } else if ($matchType) {
+                $currentType = $matchType;
+                $currentAdapter = $context->getValue($this);
             }
         }
-        return $defaultAdapter;
+        return $currentAdapter;
     }
     
     /**
-     * @param string $class
-     * @param object $object
+     * @param string $classPath
+     * @param string $type
      * @return object
      */
-    public function getTypeFilter($class, $object) {
+    public function getStaticTypeAdapter($classPath, $type) {
         foreach ($this->componentContexts as $context) {
             $contextType = $context->getType($this);
-            $metadata = $context->getMetadata();
-            if ($metadata->isSubclassOf($class) &&
-                    $contextType instanceof TypeFilter &&
-                    $contextType->matchType($object)) {
+            $class = $context->getReflection();
+            if ($class->isSubclassOf($classPath) &&
+                    $contextType instanceof StaticTypeAdapter &&
+                    $contextType->matches($type)) {
                 return $context->getValue($this);
             }
         }

@@ -28,13 +28,13 @@ abstract class Validator implements Validatable {
             $class = new XClass($this);
             $properties = $class->getProperties();
             $arguments = [
-                'name' => $name,
-                'value' => $value
+                '${name}' => $name,
+                '${value}' => $value
             ];
             foreach ($properties as $property) {
-                $arguments['_' . $property->getName()] = $property->getValue($this);
+                $arguments['${_' . $property->getName() . '}'] = $property->getValue($this);
             }
-            return Strings::evaluate($this->message, $arguments);
+            return strtr($this->message, $arguments);
         } else {
             return $this->getDefaultMessage($name, $value);
         }

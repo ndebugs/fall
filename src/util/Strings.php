@@ -30,15 +30,4 @@ final class Strings {
         $offset = strlen($source) - strlen($value);
         return $offset >= 0 && strpos($source, $value, $offset) !== false;
     }
-    
-    /**
-     * @param string $source
-     * @param array $arguments
-     * @return string
-     */
-    public static function evaluate($source, array $arguments) {
-        extract($arguments);
-        eval('$result = "' . $source . '";');
-        return $result;
-    }
 }

@@ -148,7 +148,7 @@ class ApplicationContext {
         $currentAdapter = null;
         foreach ($this->componentContexts as $context) {
             $contextType = $context->getType($this);
-            $contextClass = $context->getReflection();
+            $contextClass = $context->getClass();
             if (!$contextClass->isSubclassOf($classPath) || !$contextType instanceof TypeAdapter) {
                 continue;
             }
@@ -172,7 +172,7 @@ class ApplicationContext {
     public function getStaticTypeAdapter($classPath, $type) {
         foreach ($this->componentContexts as $context) {
             $contextType = $context->getType($this);
-            $class = $context->getReflection();
+            $class = $context->getClass();
             if ($class->isSubclassOf($classPath) &&
                     $contextType instanceof StaticTypeAdapter &&
                     $contextType->matches($type)) {

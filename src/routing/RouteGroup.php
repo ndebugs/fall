@@ -8,22 +8,22 @@ use ndebugs\fall\reflection\XClass;
 class RouteGroup {
     
     /** @var XClass */
-    private $controller;
+    private $class;
     
     /** @var Path */
     private $path;
     
     /** @return XClass */
-    public function getController() {
-        return $this->controller;
+    public function getClass() {
+        return $this->class;
     }
 
 	/**
-	 * @param XClass $controller
+	 * @param XClass $class
 	 * @return void
 	 */
-    public function setController(XClass $controller) {
-        $this->controller = $controller;
+    public function setClass(XClass $class) {
+        $this->class = $class;
     }
 
     /** @return Path */

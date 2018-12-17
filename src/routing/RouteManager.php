@@ -52,7 +52,7 @@ class RouteManager {
             $type = $context->getType($this->context);
             
             $routeGroup = new RouteGroup();
-            $routeGroup->setController($context->getReflection());
+            $routeGroup->setClass($context->getClass());
             $routeGroup->setPath(Path::parseURL($type->path));
 
             $this->routeGroups[] = $routeGroup;
@@ -64,7 +64,7 @@ class RouteManager {
      * @return Route[]
      */
     public function getRoutes(RouteGroup $routeGroup) {
-        $class = $routeGroup->getController()->getName();
+        $class = $routeGroup->getClass()->getName();
         if (!isset($this->routes[$class])) {
             $loader = new RouteLoader($this->context, $routeGroup);
             $routes = $loader->loadAll();

@@ -2,6 +2,7 @@
 
 namespace ndebugs\fall\routing;
 
+use ReflectionMethod;
 use ndebugs\fall\annotation\RequestAttribute;
 use ndebugs\fall\annotation\RequestMap;
 use ndebugs\fall\annotation\ResponseAttribute;
@@ -59,10 +60,10 @@ class RouteLoader {
     
 	/** @return Route[] */
     public function loadAll() {
-        $class = $this->group->getController();
+        $class = $this->group->getClass();
         
         $routes = [];
-        foreach ($class->getMethods() as $method) {
+        foreach ($class->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
             $route = $this->load($method);
             if ($route) {
                 $routes[] = $route;

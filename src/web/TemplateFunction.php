@@ -29,7 +29,7 @@ class TemplateFunction {
      * @param string $path
      * @return void
      */
-    public function js($path) {
+    public function includeJS($path) {
         echo '<script type="text/javascript" src="' . $this->url($path) . '"></script>';
     }
     
@@ -37,7 +37,7 @@ class TemplateFunction {
      * @param string $path
      * @return void
      */
-    public function css($path) {
+    public function includeCSS($path) {
         echo '<link rel="stylesheet" href="' . $this->url($path) . '">';
     }
 }

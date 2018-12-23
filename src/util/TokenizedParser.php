@@ -75,7 +75,7 @@ abstract class TokenizedParser {
                 $curr = $this->value[$i];
                 $c = $this->nextChar($prev, $curr);
                 $prev = $curr;
-                if ($c) {
+                if ($c != null) {
                     $result .= $c;
                 } else {
                     break;

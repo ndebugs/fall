@@ -25,6 +25,9 @@ final class QueryParameter extends RequestAttribute {
     /** @var string */
     public $type;
     
+    /** @var mixed */
+    public $defaultValue;
+    
     /** @var boolean */
     public $required;
     
@@ -45,6 +48,9 @@ final class QueryParameter extends RequestAttribute {
         $request = $requestContext->getValue();
         $query = $request->getURL()->getQuery();
         $value = $query ? $query->get($this->name) : null;
+        if ($value === null) {
+            $value = $this->defaultValue;
+        }
         
         if ($this->type) {
             $type = TypeResolver::fromString($this->type);
